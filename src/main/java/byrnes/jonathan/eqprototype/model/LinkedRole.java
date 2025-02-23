@@ -19,7 +19,7 @@ import java.util.UUID;
 public class LinkedRole {
 
     @Id
-    private final String id = UUID.randomUUID().toString();
+    private String id = UUID.randomUUID().toString();
 
     @DBRef
     private User user;
