@@ -1,5 +1,6 @@
 package byrnes.jonathan.eqprototype.service;
 
+import byrnes.jonathan.eqprototype.dto.UserLoginDto;
 import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
 import byrnes.jonathan.eqprototype.model.LinkedRole;
 import byrnes.jonathan.eqprototype.model.Role;
@@ -48,4 +49,19 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+    public User login(UserLoginDto userLoginDto) {
+        Optional<User> userOptional = this.userRepository.findByEmail(userLoginDto.getEmail());
+        if(userOptional.isEmpty()) {
+            throw new IllegalArgumentException("This email cannot be found.");
+        }
+
+        User user = userOptional.get();
+        if(userLoginDto.getEmail().equals(user.getEmail())) {
+            if(userLoginDto.getPassword().equals(user.getPassword())) {
+                System.out.println("Successfully logged in User: " + user.getEmail());
+                return user;
+            }
+        }
+        throw new IllegalArgumentException("Email/Password Incorrect.");
+    }
 }

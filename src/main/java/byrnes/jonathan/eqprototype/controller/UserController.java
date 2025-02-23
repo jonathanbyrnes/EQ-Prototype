@@ -1,5 +1,6 @@
 package byrnes.jonathan.eqprototype.controller;
 
+import byrnes.jonathan.eqprototype.dto.UserLoginDto;
 import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
 import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.service.UserService;
@@ -23,6 +24,11 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<User> register(@Valid @RequestBody UserRegistrationDto userRegistrationDto) {
         return ResponseEntity.ok(this.userService.register(userRegistrationDto));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@Valid @RequestBody UserLoginDto userLoginDto) {
+        return ResponseEntity.ok(this.userService.login(userLoginDto));
     }
 
 }
