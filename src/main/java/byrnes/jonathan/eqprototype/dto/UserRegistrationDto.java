@@ -2,7 +2,14 @@ package byrnes.jonathan.eqprototype.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+
+@Setter
+@Getter
+@AllArgsConstructor
 public class UserRegistrationDto {
 
     @NotBlank(message =  "You must enter an email.")
@@ -12,19 +19,4 @@ public class UserRegistrationDto {
     @NotBlank(message = "You must enter a password.")
     private String password;
 
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

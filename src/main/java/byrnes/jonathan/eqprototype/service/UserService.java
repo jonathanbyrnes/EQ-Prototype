@@ -34,7 +34,7 @@ public class UserService {
         Role role = roleRepository.findByName("USER")
                 .orElseGet(() -> roleRepository.save(new Role("USER")));
 
-        LinkedRole linkedRole = new LinkedRole(null, role);
+        LinkedRole linkedRole = new LinkedRole(role);
 
         User user = new User(
                 linkedRole,
