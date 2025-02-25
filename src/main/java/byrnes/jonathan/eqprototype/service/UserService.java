@@ -2,6 +2,7 @@ package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.UserLoginDto;
 import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
+import byrnes.jonathan.eqprototype.dto.UserUpdateDto;
 import byrnes.jonathan.eqprototype.model.LinkedRole;
 import byrnes.jonathan.eqprototype.model.Role;
 import byrnes.jonathan.eqprototype.model.User;
@@ -63,5 +64,23 @@ public class UserService {
             }
         }
         throw new IllegalArgumentException("Email/Password Incorrect.");
+    }
+
+    public User update(String userId, UserUpdateDto userUpdateDto) {
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if(userOptional.isEmpty()) {
+            throw new IllegalArgumentException("This user cannot be found.");
+        }
+
+        User user = userOptional.get();
+
+        if (userUpdateDto.getEmail() != null && !userUpdateDto.getEmail().isBlank()){
+            user.setEmail(userUpdateDto.getEmail());
+        }
+        if (userUpdateDto.getPassword() != null && !userUpdateDto.getPassword().isBlank()){
+            user.setPassword(userUpdateDto.getPassword());
+        }
+
+        return this.userRepository.save(user);
     }
 }
