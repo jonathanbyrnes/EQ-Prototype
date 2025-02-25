@@ -2,6 +2,7 @@ package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.UserLoginDto;
 import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
+import byrnes.jonathan.eqprototype.dto.UserUpdateDto;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
 import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.service.UserService;
@@ -19,8 +20,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,6 +110,23 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(userLoginDto)))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void testUpdate_Success() throws Exception {
+        UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "example@gmail.com", "password");
+
+        User updatedUser = new User(null, "updated@example.com", "updatedpassword", new Date(), false);
+        updatedUser.setId("123");
+
+        when(userService.update(eq("123"), any(UserUpdateDto.class))).thenReturn(updatedUser);
+
+        mockMvc.perform(put("/api/user/update/{userId}", "123")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userUpdateDto)))
+                .andExpect(status().isOk());
+    }
+
 
 
 }
