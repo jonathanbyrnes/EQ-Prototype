@@ -1,8 +1,6 @@
 package byrnes.jonathan.eqprototype.controller;
 
-import byrnes.jonathan.eqprototype.dto.UserLoginDto;
-import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
-import byrnes.jonathan.eqprototype.dto.UserUpdateDto;
+import byrnes.jonathan.eqprototype.dto.*;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
 import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.service.UserService;
@@ -124,6 +122,37 @@ public class UserControllerTest {
         mockMvc.perform(put("/api/user/update/{userId}", "123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGeneratePasswordResetToken_Success() throws Exception {
+        GeneratePasswordResetTokenDto generatePasswordResetTokenDto = new GeneratePasswordResetTokenDto(
+                "test@example.com");
+
+        when(userService.generatePasswordResetToken(any(GeneratePasswordResetTokenDto.class)))
+                .thenReturn("token-123");
+
+        mockMvc.perform(post("/api/user/generatePasswordResetToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(generatePasswordResetTokenDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testResetPassword_Success() throws Exception {
+        ResetPasswordDto resetPasswordDto = new ResetPasswordDto(
+                "updatedpassword");
+
+        User updatedUser = new User(null, "updated@example.com", "updatedpassword", new Date(), false);
+
+        when(userService.resetPassword(eq("token-123"), any(ResetPasswordDto.class)))
+                .thenReturn(updatedUser);
+
+        mockMvc.perform(post("/api/user/reset-password")
+                        .param("token", "token-123")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetPasswordDto)))
                 .andExpect(status().isOk());
     }
 
