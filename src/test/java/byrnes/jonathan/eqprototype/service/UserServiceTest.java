@@ -1,5 +1,6 @@
 package byrnes.jonathan.eqprototype.service;
 
+import byrnes.jonathan.eqprototype.dto.UserLoginDto;
 import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
 import byrnes.jonathan.eqprototype.model.LinkedRole;
 import byrnes.jonathan.eqprototype.model.Role;
@@ -14,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 
 import java.util.Date;
 import java.util.Optional;
@@ -22,6 +24,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -141,6 +145,7 @@ public class UserServiceTest {
         assertThat(linkedRoleCaptor.getValue().getRole().getName())
                 .isEqualTo("USER");
     }
+
 
 
 }

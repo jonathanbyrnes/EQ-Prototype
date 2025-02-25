@@ -1,5 +1,6 @@
 package byrnes.jonathan.eqprototype.controller;
 
+import byrnes.jonathan.eqprototype.dto.UserLoginDto;
 import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
 import byrnes.jonathan.eqprototype.model.User;
@@ -92,6 +93,21 @@ public class UserControllerTest {
                 .content(invalidJson))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void testLogin_Success() throws Exception {
+        UserLoginDto userLoginDto = new UserLoginDto(
+                "example@gmail.com", "password");
+
+        User user = new User(null, "example@gmail.com", "password", new Date(), false);
+
+        when(userService.login(any(UserLoginDto.class))).thenReturn(user);
+        mockMvc.perform(post("/api/user/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userLoginDto)))
+                .andExpect(status().isOk());
+    }
+
 
 }
 
