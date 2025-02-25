@@ -1,8 +1,6 @@
 package byrnes.jonathan.eqprototype.controller;
 
-import byrnes.jonathan.eqprototype.dto.UserLoginDto;
-import byrnes.jonathan.eqprototype.dto.UserRegistrationDto;
-import byrnes.jonathan.eqprototype.dto.UserUpdateDto;
+import byrnes.jonathan.eqprototype.dto.*;
 import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.service.UserService;
 import jakarta.validation.Valid;
@@ -33,6 +31,17 @@ public class UserController {
     public ResponseEntity<User> update(@PathVariable String userId, @Valid @RequestBody UserUpdateDto userUpdateDto) {
         return ResponseEntity.ok(this.userService.update(userId, userUpdateDto));
     }
+
+    @PostMapping("/generatePasswordResetToken")
+    public ResponseEntity<String> generatePasswordResetToken(@Valid @RequestBody GeneratePasswordResetTokenDto generatePasswordResetTokenDto) {
+        return ResponseEntity.ok(this.userService.generatePasswordResetToken(generatePasswordResetTokenDto));
+    }
+
+    @PostMapping("reset-password")
+    public ResponseEntity<User> resetPassword(@RequestParam String token, @Valid @RequestBody ResetPasswordDto resetPasswordDto) {
+        return ResponseEntity.ok(this.userService.resetPassword(token, resetPasswordDto));
+    }
+
 
 
 
