@@ -36,8 +36,7 @@ public class UserService {
             throw new IllegalArgumentException("This email already exists.");
         }
 
-        Role role = roleRepository.findByName("USER")
-                .orElseGet(() -> roleRepository.save(new Role("USER")));
+        Role role = getRoleByName("USER");
 
         LinkedRole linkedRole = new LinkedRole(role);
 
@@ -54,12 +53,8 @@ public class UserService {
     }
 
     public User login(UserLoginDto userLoginDto) {
-        Optional<User> userOptional = this.userRepository.findByEmail(userLoginDto.getEmail());
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("This email cannot be found.");
-        }
+        User user = getUserByEmail(userLoginDto.getEmail());
 
-        User user = userOptional.get();
         if (userLoginDto.getEmail().equals(user.getEmail())) {
             if (userLoginDto.getPassword().equals(user.getPassword())) {
                 System.out.println("Successfully logged in User: " + user.getEmail());
@@ -70,12 +65,7 @@ public class UserService {
     }
 
     public User update(String userId, UserUpdateDto userUpdateDto) {
-        Optional<User> userOptional = this.userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("This user cannot be found.");
-        }
-
-        User user = userOptional.get();
+        User user = getUserById(userId);
 
         if (userUpdateDto.getEmail() != null && !userUpdateDto.getEmail().isBlank()) {
             user.setEmail(userUpdateDto.getEmail());
@@ -88,12 +78,7 @@ public class UserService {
     }
 
     public String generatePasswordResetToken(GeneratePasswordResetTokenDto generatePasswordResetTokenDto) {
-        Optional<User> userOptional = this.userRepository.findByEmail(generatePasswordResetTokenDto.getEmail());
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("This email cannot be found.");
-        }
-
-        User user = userOptional.get();
+        User user = getUserByEmail(generatePasswordResetTokenDto.getEmail());
 
         String token = UUID.randomUUID().toString();
         Date expiryDate = new Date(System.currentTimeMillis() + 3600 * 1000); //1h from now
@@ -105,20 +90,32 @@ public class UserService {
     }
 
     public User resetPassword(String token, ResetPasswordDto resetPasswordDto) {
-        Optional<PasswordResetToken> tokenOptional = this.passwordResetTokenRepository.findByToken(token);
-        if (tokenOptional.isEmpty() || tokenOptional.get().getExpiryDate().before(new Date())) {
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token is invalid, or no longer valid."));
+
+        if (passwordResetToken.getExpiryDate().before(new Date())) {
             throw new IllegalArgumentException("Token is invalid, or no longer valid.");
         }
 
-        PasswordResetToken passwordResetToken = tokenOptional.get();
-        Optional<User> userOptional = userRepository.findById(passwordResetToken.getUser().getId());
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("This token belongs to an invalid user.");
-        }
+        User user = getUserById(passwordResetToken.getUser().getId());
 
-        User user = userOptional.get();
         user.setPassword(resetPasswordDto.getPassword());
         this.passwordResetTokenRepository.delete(passwordResetToken);
         return this.userRepository.save(user);
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("This email cannot be found."));
+    }
+
+    private User getUserById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("This user cannot be found."));
+    }
+
+    private Role getRoleByName(String roleName) {
+        return roleRepository.findByName(roleName)
+                .orElseGet(() -> roleRepository.save(new Role(roleName)));
     }
 }
