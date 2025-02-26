@@ -114,6 +114,21 @@ public class QuizControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void testReuse_Success() throws Exception {
+        String quizId = "12345";
+        CreateQuizDto createQuizDto = new CreateQuizDto(
+                "Test Quiz", "Test quiz description", false);
+        Quiz newQuiz = createFakeQuiz(createQuizDto);
+
+        when(quizService.reuse(eq(quizId))).thenReturn(newQuiz);
+
+        mockMvc.perform(post("/api/quiz/reuse")
+                        .param("quizId", quizId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
     private Quiz createFakeQuiz(CreateQuizDto createQuizDto) {
         Category category = new Category("None");
         LinkedRole linkedRole = new LinkedRole(new Role("USER"));
