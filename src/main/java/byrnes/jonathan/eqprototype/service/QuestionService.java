@@ -30,13 +30,13 @@ public class QuestionService {
                            CreateQuestionDto createQuestionDto) {
 
         Optional<Quiz> quizOptional = this.quizRepository.findById(quizId);
-        if(quizOptional.isEmpty()) {
+        if (quizOptional.isEmpty()) {
             throw new IllegalArgumentException("Quiz cannot be found.");
         }
         Quiz quiz = quizOptional.get();
 
         Optional<Type> typeOptional = this.typeRepository.findById(typeId);
-        if(typeOptional.isEmpty()) {
+        if (typeOptional.isEmpty()) {
             throw new IllegalArgumentException("Type cannot be found.");
         }
         Type type = typeOptional.get();
@@ -50,8 +50,20 @@ public class QuestionService {
     }
 
     public Question edit(String questionId, EditQuestionDto editQuestionDto) {
+        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        if (questionOptional.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find question.");
+        }
 
-        return null;
+        Question question = questionOptional.get();
+
+        question.setQuestionStr(editQuestionDto.getQuestionStr());
+        question.setTimeLimit(editQuestionDto.getTimeLimit());
+        question.setWorth(editQuestionDto.getWorth());
+        question.setAnswers(editQuestionDto.getAnswers());
+        question.setOptions(editQuestionDto.getOptions());
+
+        return this.questionRepository.save(question);
     }
 
 }
