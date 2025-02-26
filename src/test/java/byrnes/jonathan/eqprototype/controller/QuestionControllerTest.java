@@ -1,6 +1,7 @@
 package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuestionDto;
+import byrnes.jonathan.eqprototype.dto.EditQuestionDto;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
 import byrnes.jonathan.eqprototype.model.*;
 import byrnes.jonathan.eqprototype.service.QuestionService;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +63,37 @@ public class QuestionControllerTest {
                         .param("typeId", "type123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createQuestionDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testEdit_Success() throws Exception {
+        EditQuestionDto editQuestionDto = new EditQuestionDto(
+                "What is the capital of France?",
+                30,
+                10,
+                List.of("Paris", "London"),
+                List.of("Option1", "Option2")
+        );
+        CreateQuestionDto createQuestionDto = new CreateQuestionDto(
+                "What is 2+2?", 10, 30,
+                List.of("England", "France"),
+                List.of("Option2", "Option1"));
+
+        Question question = createFakeQuestion(createQuestionDto);
+
+        question.setQuestionStr(editQuestionDto.getQuestionStr());
+        question.setTimeLimit(editQuestionDto.getTimeLimit());
+        question.setWorth(editQuestionDto.getWorth());
+        question.setAnswers(editQuestionDto.getAnswers());
+        question.setOptions(editQuestionDto.getOptions());
+
+        when(questionService.edit(eq(question.getId()), any(EditQuestionDto.class))).thenReturn(question);
+
+        mockMvc.perform(put("/api/question/edit")
+                        .param("questionId", question.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(editQuestionDto)))
                 .andExpect(status().isOk());
     }
 
