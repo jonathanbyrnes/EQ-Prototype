@@ -1,6 +1,8 @@
 package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuestionDto;
+import byrnes.jonathan.eqprototype.dto.EditQuestionDto;
+import byrnes.jonathan.eqprototype.dto.EditQuizDto;
 import byrnes.jonathan.eqprototype.model.Question;
 import byrnes.jonathan.eqprototype.model.Quiz;
 import byrnes.jonathan.eqprototype.model.Type;
@@ -45,6 +47,11 @@ public class QuestionService {
                 createQuestionDto.getOptions());
 
         return this.questionRepository.save(question);
+    }
+
+    public Question edit(String questionId, EditQuestionDto editQuestionDto) {
+
+        return null;
     }
 
 }
