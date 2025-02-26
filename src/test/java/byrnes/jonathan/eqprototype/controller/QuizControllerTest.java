@@ -2,6 +2,7 @@ package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuestionDto;
 import byrnes.jonathan.eqprototype.dto.CreateQuizDto;
+import byrnes.jonathan.eqprototype.dto.EditQuizDto;
 import byrnes.jonathan.eqprototype.dto.ShareQuizDto;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
 import byrnes.jonathan.eqprototype.model.*;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,6 +79,27 @@ public class QuizControllerTest {
         mockMvc.perform(post("/api/quiz/share")
                         .param("quizId", quiz.getId())
                         .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testEdit_Success() throws Exception {
+        EditQuizDto editQuizDto = new EditQuizDto("New Quiz Title", "Updated quiz description", true);
+
+        CreateQuizDto createQuizDto = new CreateQuizDto(
+                "Test Quiz", "Test quiz description", false);
+        Quiz quiz = createFakeQuiz(createQuizDto);
+
+        quiz.setTitle(editQuizDto.getTitle());
+        quiz.setDescription(editQuizDto.getDescription());
+        quiz.setActive(editQuizDto.isActive());
+
+        when(quizService.edit(eq(quiz.getId()), any(EditQuizDto.class))).thenReturn(quiz);
+
+        mockMvc.perform(put("/api/quiz/edit")
+                        .param("quizId", quiz.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(editQuizDto)))
                 .andExpect(status().isOk());
     }
 
