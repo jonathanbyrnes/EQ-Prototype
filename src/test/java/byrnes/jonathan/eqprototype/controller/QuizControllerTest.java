@@ -2,6 +2,7 @@ package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuestionDto;
 import byrnes.jonathan.eqprototype.dto.CreateQuizDto;
+import byrnes.jonathan.eqprototype.dto.ShareQuizDto;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
 import byrnes.jonathan.eqprototype.model.*;
 import byrnes.jonathan.eqprototype.service.QuizService;
@@ -58,6 +59,24 @@ public class QuizControllerTest {
                         .param("categoryId", "category123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createQuizDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testShare_Success() throws Exception {
+        CreateQuizDto createQuizDto = new CreateQuizDto(
+                "Test Quiz", "Test quiz description", false);
+        Quiz quiz = createFakeQuiz(createQuizDto);
+        quiz.setId("12345");
+
+        ShareQuizDto shareQuizDto = new ShareQuizDto(
+                "http://example.com/join/" + quiz.getId(),
+                "base64QR");
+        when(quizService.share(quiz.getId())).thenReturn(shareQuizDto);
+
+        mockMvc.perform(post("/api/quiz/share")
+                        .param("quizId", quiz.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
