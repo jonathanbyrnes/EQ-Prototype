@@ -14,6 +14,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -37,13 +38,13 @@ public class QuizService {
 
     public Quiz create(String userId, String categoryId, CreateQuizDto createQuizDto) {
         Optional<User> userOptional = this.userRepository.findById(userId);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             throw new IllegalArgumentException("User cannot be found.");
         }
         User user = userOptional.get();
 
         Optional<Category> categoryOptional = this.categoryRepository.findById(categoryId);
-        if(categoryOptional.isEmpty()) {
+        if (categoryOptional.isEmpty()) {
             throw new IllegalArgumentException("Category cannot be found.");
         }
         Category category = categoryOptional.get();
@@ -56,12 +57,12 @@ public class QuizService {
 
     public ShareQuizDto share(String quizId) {
         Optional<Quiz> quizOptional = this.quizRepository.findById(quizId);
-        if(quizOptional.isEmpty()) {
+        if (quizOptional.isEmpty()) {
             throw new IllegalArgumentException("Quiz cannot be found.");
         }
         Quiz quiz = quizOptional.get();
 
-        if(!quiz.isActive()) {
+        if (!quiz.isActive()) {
             throw new IllegalArgumentException("This quiz is not active.");
         }
 
@@ -87,6 +88,18 @@ public class QuizService {
         quiz.setActive(editQuizDto.isActive());
 
         return quizRepository.save(quiz);
+    }
+
+    public ResponseEntity<Void> delete(String quizId) {
+        Optional<Quiz> quizOptional = quizRepository.findById(quizId);
+        if (quizOptional.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find quiz.");
+        }
+
+        Quiz quiz = quizOptional.get();
+        this.quizRepository.delete(quiz);
+
+        return ResponseEntity.ok().build();
     }
 
     private byte[] generateQRCode(String text, int width, int height) {
