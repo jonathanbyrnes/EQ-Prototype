@@ -102,6 +102,21 @@ public class QuizService {
         return ResponseEntity.ok().build();
     }
 
+    public Quiz reuse(String quizId) {
+        Optional<Quiz> quizOptional = quizRepository.findById(quizId);
+        if (quizOptional.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find quiz.");
+        }
+        Quiz quiz = quizOptional.get();
+
+        Quiz newQuiz = new Quiz(
+                quiz.getUser(), quiz.getCategory(), quiz.getTitle(),
+                quiz.getDescription(), quiz.isActive(), new Date()
+        );
+
+        return this.quizRepository.save(newQuiz);
+    }
+
     private byte[] generateQRCode(String text, int width, int height) {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {
