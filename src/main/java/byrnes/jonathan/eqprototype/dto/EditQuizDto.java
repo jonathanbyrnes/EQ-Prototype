@@ -20,4 +20,7 @@ public class EditQuizDto {
     @NotNull(message = "You must select an activity status.")
     private boolean isActive;
 
+    @NotNull(message = "You must select a randomised status.")
+    private boolean isQuestionsRandomised;
+
 }

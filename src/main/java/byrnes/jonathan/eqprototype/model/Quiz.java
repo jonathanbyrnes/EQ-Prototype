@@ -39,6 +39,9 @@ public class Quiz {
     private boolean isActive;
 
     @NonNull
+    private boolean isQuestionsRandomised;
+
+    @NonNull
     private Date dateOfCreation;
 
     private String generateQuizId() {
