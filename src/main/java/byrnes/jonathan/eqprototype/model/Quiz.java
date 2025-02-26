@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.UUID;
+import java.util.Random;
 
 @Document(collection = "quizzes")
 @Getter
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class Quiz {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    private String id = generateQuizId();
 
     @NonNull
     @DBRef
@@ -41,5 +41,8 @@ public class Quiz {
     @NonNull
     private Date dateOfCreation;
 
-
+    private String generateQuizId() {
+        int code = 10000 + new Random().nextInt(90000); //5 digit quiz id
+        return String.valueOf(code);
+    }
 }

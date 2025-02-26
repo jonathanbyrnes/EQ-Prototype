@@ -1,6 +1,7 @@
 package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuizDto;
+import byrnes.jonathan.eqprototype.dto.ShareQuizDto;
 import byrnes.jonathan.eqprototype.model.Quiz;
 import byrnes.jonathan.eqprototype.service.QuizService;
 import jakarta.validation.Valid;
@@ -21,5 +22,11 @@ public class QuizController {
     public ResponseEntity<Quiz> create(@RequestParam String userId, @RequestParam String categoryId, @Valid @RequestBody CreateQuizDto createQuizDto) {
         return ResponseEntity.ok(this.quizService.create(userId, categoryId, createQuizDto));
     }
+
+    @PostMapping("/share")
+    public ResponseEntity<ShareQuizDto> share(@RequestParam String quizId) {
+        return ResponseEntity.ok(this.quizService.share(quizId));
+    }
+
 
 }
