@@ -37,4 +37,9 @@ public class QuizController {
         return ResponseEntity.ok(this.quizService.edit(quizId, editQuizDto));
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> delete(@RequestParam String quizId) {
+        return this.quizService.delete(quizId);
+    }
+
 }
