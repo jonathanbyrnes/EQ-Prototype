@@ -40,7 +40,7 @@ public class QuizService {
         Category category = getCategoryById(categoryId);
 
         Quiz quiz = new Quiz(user, category, createQuizDto.getTitle(), createQuizDto.getDescription(),
-                createQuizDto.isActive(), new Date());
+                createQuizDto.isActive(), createQuizDto.isQuestionsRandomised(), new Date());
 
         return this.quizRepository.save(quiz);
     }
@@ -83,7 +83,7 @@ public class QuizService {
 
         Quiz newQuiz = new Quiz(
                 quiz.getUser(), quiz.getCategory(), quiz.getTitle(),
-                quiz.getDescription(), quiz.isActive(), new Date()
+                quiz.getDescription(), quiz.isActive(), quiz.isQuestionsRandomised(), new Date()
         );
 
         return this.quizRepository.save(newQuiz);
