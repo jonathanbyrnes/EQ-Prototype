@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class QuizService {
@@ -37,17 +36,8 @@ public class QuizService {
     }
 
     public Quiz create(String userId, String categoryId, CreateQuizDto createQuizDto) {
-        Optional<User> userOptional = this.userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("User cannot be found.");
-        }
-        User user = userOptional.get();
-
-        Optional<Category> categoryOptional = this.categoryRepository.findById(categoryId);
-        if (categoryOptional.isEmpty()) {
-            throw new IllegalArgumentException("Category cannot be found.");
-        }
-        Category category = categoryOptional.get();
+        User user = getUserById(userId);
+        Category category = getCategoryById(categoryId);
 
         Quiz quiz = new Quiz(user, category, createQuizDto.getTitle(), createQuizDto.getDescription(),
                 createQuizDto.isActive(), new Date());
@@ -56,11 +46,7 @@ public class QuizService {
     }
 
     public ShareQuizDto share(String quizId) {
-        Optional<Quiz> quizOptional = this.quizRepository.findById(quizId);
-        if (quizOptional.isEmpty()) {
-            throw new IllegalArgumentException("Quiz cannot be found.");
-        }
-        Quiz quiz = quizOptional.get();
+        Quiz quiz = getQuizById(quizId);
 
         if (!quiz.isActive()) {
             throw new IllegalArgumentException("This quiz is not active.");
@@ -76,12 +62,7 @@ public class QuizService {
     }
 
     public Quiz edit(String quizId, EditQuizDto editQuizDto) {
-        Optional<Quiz> quizOptional = quizRepository.findById(quizId);
-        if (quizOptional.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find quiz.");
-        }
-
-        Quiz quiz = quizOptional.get();
+        Quiz quiz = getQuizById(quizId);
 
         quiz.setTitle(editQuizDto.getTitle());
         quiz.setDescription(editQuizDto.getDescription());
@@ -91,23 +72,14 @@ public class QuizService {
     }
 
     public ResponseEntity<Void> delete(String quizId) {
-        Optional<Quiz> quizOptional = quizRepository.findById(quizId);
-        if (quizOptional.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find quiz.");
-        }
-
-        Quiz quiz = quizOptional.get();
+        Quiz quiz = getQuizById(quizId);
         this.quizRepository.delete(quiz);
 
         return ResponseEntity.ok().build();
     }
 
     public Quiz reuse(String quizId) {
-        Optional<Quiz> quizOptional = quizRepository.findById(quizId);
-        if (quizOptional.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find quiz.");
-        }
-        Quiz quiz = quizOptional.get();
+        Quiz quiz = getQuizById(quizId);
 
         Quiz newQuiz = new Quiz(
                 quiz.getUser(), quiz.getCategory(), quiz.getTitle(),
@@ -127,6 +99,21 @@ public class QuizService {
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Cannot generate QR code.", e);
         }
+    }
+
+    private Quiz getQuizById(String quizId) {
+        return quizRepository.findById(quizId)
+                .orElseThrow(() -> new IllegalArgumentException("Quiz cannot be found."));
+    }
+
+    private User getUserById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User cannot be found."));
+    }
+
+    private Category getCategoryById(String categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category cannot be found."));
     }
 
 }

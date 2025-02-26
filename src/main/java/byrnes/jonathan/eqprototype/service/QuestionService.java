@@ -2,7 +2,6 @@ package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuestionDto;
 import byrnes.jonathan.eqprototype.dto.EditQuestionDto;
-import byrnes.jonathan.eqprototype.dto.EditQuizDto;
 import byrnes.jonathan.eqprototype.model.Question;
 import byrnes.jonathan.eqprototype.model.Quiz;
 import byrnes.jonathan.eqprototype.model.Type;
@@ -10,8 +9,6 @@ import byrnes.jonathan.eqprototype.repository.QuestionRepository;
 import byrnes.jonathan.eqprototype.repository.QuizRepository;
 import byrnes.jonathan.eqprototype.repository.TypeRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class QuestionService {
@@ -29,17 +26,8 @@ public class QuestionService {
     public Question create(String quizId, String typeId,
                            CreateQuestionDto createQuestionDto) {
 
-        Optional<Quiz> quizOptional = this.quizRepository.findById(quizId);
-        if (quizOptional.isEmpty()) {
-            throw new IllegalArgumentException("Quiz cannot be found.");
-        }
-        Quiz quiz = quizOptional.get();
-
-        Optional<Type> typeOptional = this.typeRepository.findById(typeId);
-        if (typeOptional.isEmpty()) {
-            throw new IllegalArgumentException("Type cannot be found.");
-        }
-        Type type = typeOptional.get();
+        Quiz quiz = getQuizById(quizId);
+        Type type = getTypeById(typeId);
 
         Question question = new Question(quiz, type,
                 createQuestionDto.getQuestionStr(), createQuestionDto.getTimeLimit(),
@@ -50,12 +38,7 @@ public class QuestionService {
     }
 
     public Question edit(String questionId, EditQuestionDto editQuestionDto) {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
-        if (questionOptional.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find question.");
-        }
-
-        Question question = questionOptional.get();
+        Question question = getQuestionById(questionId);
 
         question.setQuestionStr(editQuestionDto.getQuestionStr());
         question.setTimeLimit(editQuestionDto.getTimeLimit());
@@ -64,6 +47,21 @@ public class QuestionService {
         question.setOptions(editQuestionDto.getOptions());
 
         return this.questionRepository.save(question);
+    }
+
+    private Quiz getQuizById(String quizId) {
+        return quizRepository.findById(quizId)
+                .orElseThrow(() -> new IllegalArgumentException("Quiz cannot be found."));
+    }
+
+    private Type getTypeById(String typeId) {
+        return typeRepository.findById(typeId)
+                .orElseThrow(() -> new IllegalArgumentException("Type cannot be found."));
+    }
+
+    private Question getQuestionById(String questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find question."));
     }
 
 }
