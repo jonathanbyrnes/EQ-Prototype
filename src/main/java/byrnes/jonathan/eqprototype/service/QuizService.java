@@ -1,6 +1,7 @@
 package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuizDto;
+import byrnes.jonathan.eqprototype.dto.EditQuizDto;
 import byrnes.jonathan.eqprototype.dto.ShareQuizDto;
 import byrnes.jonathan.eqprototype.model.Category;
 import byrnes.jonathan.eqprototype.model.Quiz;
@@ -71,6 +72,21 @@ public class QuizService {
         String qrBase64 = Base64.getEncoder().encodeToString(qrCodeBytes);
 
         return new ShareQuizDto(link, qrBase64);
+    }
+
+    public Quiz edit(String quizId, EditQuizDto editQuizDto) {
+        Optional<Quiz> quizOptional = quizRepository.findById(quizId);
+        if (quizOptional.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find quiz.");
+        }
+
+        Quiz quiz = quizOptional.get();
+
+        quiz.setTitle(editQuizDto.getTitle());
+        quiz.setDescription(editQuizDto.getDescription());
+        quiz.setActive(editQuizDto.isActive());
+
+        return quizRepository.save(quiz);
     }
 
     private byte[] generateQRCode(String text, int width, int height) {
