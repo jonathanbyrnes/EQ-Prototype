@@ -42,4 +42,9 @@ public class QuizController {
         return this.quizService.delete(quizId);
     }
 
+    @PostMapping("/reuse")
+    public ResponseEntity<Quiz> reuse(@RequestParam String quizId) {
+        return ResponseEntity.ok(this.quizService.reuse(quizId));
+    }
+
 }
