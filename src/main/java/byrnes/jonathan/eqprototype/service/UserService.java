@@ -1,14 +1,8 @@
 package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.*;
-import byrnes.jonathan.eqprototype.model.LinkedRole;
-import byrnes.jonathan.eqprototype.model.PasswordResetToken;
-import byrnes.jonathan.eqprototype.model.Role;
-import byrnes.jonathan.eqprototype.model.User;
-import byrnes.jonathan.eqprototype.repository.LinkedRoleRepository;
-import byrnes.jonathan.eqprototype.repository.PasswordResetTokenRepository;
-import byrnes.jonathan.eqprototype.repository.RoleRepository;
-import byrnes.jonathan.eqprototype.repository.UserRepository;
+import byrnes.jonathan.eqprototype.model.*;
+import byrnes.jonathan.eqprototype.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -22,12 +16,20 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final LinkedRoleRepository linkedRoleRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final QuizRepository quizRepository;
+    private final LinkedQuizRepository linkedQuizRepository;
+    private final QuestionRepository questionRepository;
+    private final ResponseRepository responseRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, LinkedRoleRepository linkedRoleRepository, PasswordResetTokenRepository passwordResetTokenRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, LinkedRoleRepository linkedRoleRepository, PasswordResetTokenRepository passwordResetTokenRepository, QuizRepository quizRepository, LinkedQuizRepository linkedQuizRepository, QuestionRepository questionRepository, ResponseRepository responseRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.linkedRoleRepository = linkedRoleRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.quizRepository = quizRepository;
+        this.linkedQuizRepository = linkedQuizRepository;
+        this.questionRepository = questionRepository;
+        this.responseRepository = responseRepository;
     }
 
     public User register(UserRegistrationDto userRegistrationDto) {
@@ -104,18 +106,76 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+    public LinkedQuiz joinQuiz(String userId, String quizId) {
+        User user = getUserById(userId);
+        Quiz quiz = getQuizById(quizId);
+
+        LinkedQuiz linkedQuiz = new LinkedQuiz(
+                user, quiz, new Date(), "IN PROGRESS", 0, new Date()
+        );
+
+        return this.linkedQuizRepository.save(linkedQuiz);
+    }
+
+    public Response submitResponse(String linkedQuizId, String questionId, ResponseDto responseDto) {
+        LinkedQuiz linkedQuiz = getLinkedQuizById(linkedQuizId);
+        Question question = getQuestionById(questionId);
+
+        Date questionStartTime = linkedQuiz.getCurrentQStartTime();
+        Date submissionTime = new Date();
+        long elapsedMillis = submissionTime.getTime() - questionStartTime.getTime();
+        long timeLimitMillis = question.getTimeLimit() * 1000L;
+
+        boolean isWithinTime = elapsedMillis <= timeLimitMillis;
+
+        boolean isCorrect = question.getAnswers().contains(responseDto.getResponse())
+                && isWithinTime;
+
+        if (isCorrect) {
+            linkedQuiz.setScore(linkedQuiz.getScore() + question.getWorth());
+            this.linkedQuizRepository.save(linkedQuiz);
+        }
+
+        Response response = new Response(
+                linkedQuiz,
+                question,
+                responseDto.getResponse(),
+                isCorrect,
+                submissionTime
+        );
+
+        return this.responseRepository.save(response);
+    }
+
+
     private User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
+        return this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("This email cannot be found."));
     }
 
     private User getUserById(String userId) {
-        return userRepository.findById(userId)
+        return this.userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("This user cannot be found."));
     }
 
     private Role getRoleByName(String roleName) {
-        return roleRepository.findByName(roleName)
-                .orElseGet(() -> roleRepository.save(new Role(roleName)));
+        return this.roleRepository.findByName(roleName)
+                .orElseGet(() -> this.roleRepository.save(new Role(roleName)));
     }
+
+    private Quiz getQuizById(String quizId) {
+        return this.quizRepository.findById(quizId)
+                .orElseThrow(() -> new IllegalArgumentException("This quiz cannot be found."));
+    }
+
+    private LinkedQuiz getLinkedQuizById(String linkedQuizId) {
+        return this.linkedQuizRepository.findById(linkedQuizId)
+                .orElseThrow(() -> new IllegalArgumentException("This linked quiz cannot be found."));
+    }
+
+    private Question getQuestionById(String questionId) {
+        return this.questionRepository.findById(questionId)
+                .orElseThrow(() -> new IllegalArgumentException("This question cannot be found."));
+    }
+
 }

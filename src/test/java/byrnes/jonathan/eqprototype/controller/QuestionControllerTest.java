@@ -51,7 +51,7 @@ public class QuestionControllerTest {
         List<String> answers = Arrays.asList("Correct Answer");
         List<String> options = Arrays.asList("Option1", "Option2", "Option3");
         CreateQuestionDto createQuestionDto = new CreateQuestionDto(
-                "What is 2+2?", 30, 10, answers, options);
+                "What is 2+2?", 30, 10, answers, options, 1);
 
         Question question = createFakeQuestion(createQuestionDto);
 
@@ -73,12 +73,12 @@ public class QuestionControllerTest {
                 30,
                 10,
                 List.of("Paris", "London"),
-                List.of("Option1", "Option2")
-        );
+                List.of("Option1", "Option2"), 1);
+
         CreateQuestionDto createQuestionDto = new CreateQuestionDto(
                 "What is 2+2?", 10, 30,
                 List.of("England", "France"),
-                List.of("Option2", "Option1"));
+                List.of("Option2", "Option1"),2);
 
         Question question = createFakeQuestion(createQuestionDto);
 
@@ -112,7 +112,8 @@ public class QuestionControllerTest {
 
         return new Question(
                 quiz, type, createQuestionDto.getQuestionStr(), createQuestionDto.getTimeLimit(),
-                createQuestionDto.getWorth(), createQuestionDto.getAnswers(), createQuestionDto.getOptions()
+                createQuestionDto.getWorth(), createQuestionDto.getAnswers(), createQuestionDto.getOptions(),
+                createQuestionDto.getQuestionNum()
         );
     }
 

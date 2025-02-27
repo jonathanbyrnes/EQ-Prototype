@@ -43,4 +43,7 @@ public class Question {
     @NonNull
     private List<String> options;
 
+    @NonNull
+    private int questionNum;
+
 }
