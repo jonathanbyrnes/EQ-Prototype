@@ -39,4 +39,7 @@ public class LinkedQuiz {
 
     @NonNull
     private Date currentQStartTime;
+
+    @NonNull
+    private Date lastActivityTime;
 }

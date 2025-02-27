@@ -104,7 +104,7 @@ public class QuestionControllerTest {
                 linkedRole, "email", "password", new Date(), false
         );
         Quiz quiz = new Quiz(
-                user, category, "Title", "Description", false, false, new Date()
+                user, category, "Title", "Description", false, false, new Date(), false
         );
         quiz.setId("quiz123");
         Type type = new Type("MCQ");
