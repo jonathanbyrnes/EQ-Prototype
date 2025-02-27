@@ -32,7 +32,7 @@ public class QuestionService {
         Question question = new Question(quiz, type,
                 createQuestionDto.getQuestionStr(), createQuestionDto.getTimeLimit(),
                 createQuestionDto.getWorth(), createQuestionDto.getAnswers(),
-                createQuestionDto.getOptions());
+                createQuestionDto.getOptions(), createQuestionDto.getQuestionNum());
 
         return this.questionRepository.save(question);
     }

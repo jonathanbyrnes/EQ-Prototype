@@ -1,6 +1,8 @@
 package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.*;
+import byrnes.jonathan.eqprototype.model.LinkedQuiz;
+import byrnes.jonathan.eqprototype.model.Response;
 import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.service.UserService;
 import jakarta.validation.Valid;
@@ -37,9 +39,22 @@ public class UserController {
         return ResponseEntity.ok(this.userService.generatePasswordResetToken(generatePasswordResetTokenDto));
     }
 
-    @PostMapping("reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<User> resetPassword(@RequestParam String token, @Valid @RequestBody ResetPasswordDto resetPasswordDto) {
         return ResponseEntity.ok(this.userService.resetPassword(token, resetPasswordDto));
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<LinkedQuiz> joinQuiz(@RequestParam String userId,
+                                               @RequestParam String quizId) {
+        return ResponseEntity.ok(this.userService.joinQuiz(userId, quizId));
+    }
+
+    @PostMapping("submit")
+    public ResponseEntity<Response> submitResponse(@RequestParam String linkedQuizId,
+                                                   @RequestParam String questionId,
+                                                   @Valid @RequestBody ResponseDto responseDto) {
+        return ResponseEntity.ok(this.userService.submitResponse(linkedQuizId, questionId, responseDto));
     }
 
 

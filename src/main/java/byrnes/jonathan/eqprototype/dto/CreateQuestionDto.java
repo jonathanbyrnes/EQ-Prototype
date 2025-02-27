@@ -27,6 +27,8 @@ public class CreateQuestionDto {
     @NotEmpty(message = "You must enter an answer.")
     private List<String> answers;
 
-
     private List<String> options;
+
+    @NotNull
+    private int questionNum;
 }

@@ -8,42 +8,34 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
+import java.util.Date;
 import java.util.UUID;
 
-@Document(collection = "questions")
+@RequiredArgsConstructor
 @Getter
 @Setter
-@RequiredArgsConstructor
-public class Question {
+@Document(collection = "responses")
+public class Response {
 
     @Id
     private String id = UUID.randomUUID().toString();
 
     @NonNull
     @DBRef
-    private Quiz quiz;
+    private LinkedQuiz linkedQuiz;
 
     @NonNull
     @DBRef
-    private Type type;
+    private Question question;
 
     @NonNull
-    private String questionStr;
+    private String responseStr;
 
     @NonNull
-    private int timeLimit;
+    private boolean isCorrect;
 
     @NonNull
-    private int worth;
+    private Date answerTime;
 
-    @NonNull
-    private List<String> answers;
-
-    @NonNull
-    private List<String> options;
-
-    @NonNull
-    private int questionNum;
 
 }
