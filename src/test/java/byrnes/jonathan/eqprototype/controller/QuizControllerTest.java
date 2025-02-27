@@ -49,7 +49,7 @@ public class QuizControllerTest {
     @Test
     void testCreate_Success() throws Exception {
         CreateQuizDto createQuizDto = new CreateQuizDto(
-                "Test Quiz", "Test quiz description", false, false);
+                "Test Quiz", "Test quiz description", false, false, false);
 
         Quiz quiz = createFakeQuiz(createQuizDto);
 
@@ -67,7 +67,7 @@ public class QuizControllerTest {
     @Test
     void testShare_Success() throws Exception {
         CreateQuizDto createQuizDto = new CreateQuizDto(
-                "Test Quiz", "Test quiz description", false, false);
+                "Test Quiz", "Test quiz description", false, false, false);
         Quiz quiz = createFakeQuiz(createQuizDto);
         quiz.setId("12345");
 
@@ -84,10 +84,10 @@ public class QuizControllerTest {
 
     @Test
     void testEdit_Success() throws Exception {
-        EditQuizDto editQuizDto = new EditQuizDto("New Quiz Title", "Updated quiz description", true, true);
+        EditQuizDto editQuizDto = new EditQuizDto("New Quiz Title", "Updated quiz description", true, true, true);
 
         CreateQuizDto createQuizDto = new CreateQuizDto(
-                "Test Quiz", "Test quiz description", false, false);
+                "Test Quiz", "Test quiz description", false, false, false);
         Quiz quiz = createFakeQuiz(createQuizDto);
 
         quiz.setTitle(editQuizDto.getTitle());
@@ -118,7 +118,7 @@ public class QuizControllerTest {
     void testReuse_Success() throws Exception {
         String quizId = "12345";
         CreateQuizDto createQuizDto = new CreateQuizDto(
-                "Test Quiz", "Test quiz description", false, false);
+                "Test Quiz", "Test quiz description", false, false, false);
         Quiz newQuiz = createFakeQuiz(createQuizDto);
 
         when(quizService.reuse(eq(quizId))).thenReturn(newQuiz);
@@ -140,7 +140,7 @@ public class QuizControllerTest {
 
         return new Quiz(
                 user, category, createQuizDto.getTitle(), createQuizDto.getDescription(),
-                createQuizDto.isActive(), createQuizDto.isQuestionsRandomised(), new Date());
+                createQuizDto.isActive(), createQuizDto.isQuestionsRandomised(), new Date(), createQuizDto.isInstantFeedback());
     }
 
 

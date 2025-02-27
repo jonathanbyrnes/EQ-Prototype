@@ -44,6 +44,9 @@ public class Quiz {
     @NonNull
     private Date dateOfCreation;
 
+    @NonNull
+    private boolean isInstantFeedback;
+
     private String generateQuizId() {
         int code = 10000 + new Random().nextInt(90000); //5 digit quiz id
         return String.valueOf(code);

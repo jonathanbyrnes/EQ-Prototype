@@ -111,7 +111,7 @@ public class UserService {
         Quiz quiz = getQuizById(quizId);
 
         LinkedQuiz linkedQuiz = new LinkedQuiz(
-                user, quiz, new Date(), "IN PROGRESS", 0, new Date()
+                user, quiz, new Date(), "IN PROGRESS", 0, new Date(), new Date()
         );
 
         return this.linkedQuizRepository.save(linkedQuiz);
@@ -120,6 +120,7 @@ public class UserService {
     public Response submitResponse(String linkedQuizId, String questionId, ResponseDto responseDto) {
         LinkedQuiz linkedQuiz = getLinkedQuizById(linkedQuizId);
         Question question = getQuestionById(questionId);
+        linkedQuiz.setLastActivityTime(new Date());
 
         Date questionStartTime = linkedQuiz.getCurrentQStartTime();
         Date submissionTime = new Date();

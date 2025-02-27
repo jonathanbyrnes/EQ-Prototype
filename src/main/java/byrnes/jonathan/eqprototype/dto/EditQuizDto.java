@@ -23,4 +23,6 @@ public class EditQuizDto {
     @NotNull(message = "You must select a randomised status.")
     private boolean isQuestionsRandomised;
 
+    @NotNull(message = "You must select a feedback status.")
+    private boolean isInstantFeedback;
 }
