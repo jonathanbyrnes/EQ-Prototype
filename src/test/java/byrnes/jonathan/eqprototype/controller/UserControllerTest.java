@@ -209,6 +209,17 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void testCompleteQuiz_Success() throws Exception {
+        String linkedQuizId = "test-quiz-id";
+        QuizSummaryDto summary = new QuizSummaryDto(linkedQuizId, 10, 7, 70);
+
+        when(userService.completeQuiz(linkedQuizId)).thenReturn(summary);
+
+        mockMvc.perform(post("/api/user/complete")
+                        .param("linkedQuizId", linkedQuizId))
+                .andExpect(status().isOk());
+    }
 
 }
 
