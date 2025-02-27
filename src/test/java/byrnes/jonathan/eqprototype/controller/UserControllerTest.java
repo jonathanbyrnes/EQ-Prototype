@@ -168,7 +168,7 @@ public class UserControllerTest {
         Quiz dummyQuiz = Mockito.mock(Quiz.class);
 
         Date now = new Date();
-        LinkedQuiz linkedQuiz = new LinkedQuiz(dummyUser, dummyQuiz, now, "IN PROGRESS", 0, now);
+        LinkedQuiz linkedQuiz = new LinkedQuiz(dummyUser, dummyQuiz, now, "IN PROGRESS", 0, now, now);
         linkedQuiz.setId("linkedQuiz123");
 
         when(userService.joinQuiz(userId, quizId)).thenReturn(linkedQuiz);
