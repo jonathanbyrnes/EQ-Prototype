@@ -6,6 +6,7 @@ import byrnes.jonathan.eqprototype.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -148,6 +149,27 @@ public class UserService {
         return this.responseRepository.save(response);
     }
 
+    public QuizSummaryDto completeQuiz(String linkedQuizId) {
+        LinkedQuiz linkedQuiz = getLinkedQuizById(linkedQuizId);
+
+        if(!linkedQuiz.getStatus().equals("COMPLETE")) {
+            linkedQuiz.setStatus("COMPLETE");
+            this.linkedQuizRepository.save(linkedQuiz);
+        }
+
+        List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuizId);
+        int totalQuestions = responses.size();
+
+        int correctAnswers = 0;
+        for (Response response : responses) {
+            if (response.isCorrect()) {
+                correctAnswers++;
+            }
+        }
+
+        return new QuizSummaryDto(
+                linkedQuizId, totalQuestions, correctAnswers, linkedQuiz.getScore());
+    }
 
     private User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email)
