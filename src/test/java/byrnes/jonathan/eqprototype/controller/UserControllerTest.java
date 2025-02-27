@@ -2,20 +2,23 @@ package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.*;
 import byrnes.jonathan.eqprototype.exceptions.GlobalExceptionHandler;
-import byrnes.jonathan.eqprototype.model.User;
+import byrnes.jonathan.eqprototype.model.*;
 import byrnes.jonathan.eqprototype.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -156,6 +159,55 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void testJoinQuiz_Success() throws Exception {
+        String userId = "user123";
+        String quizId = "quiz123";
+
+        User dummyUser = Mockito.mock(User.class);
+        Quiz dummyQuiz = Mockito.mock(Quiz.class);
+
+        Date now = new Date();
+        LinkedQuiz linkedQuiz = new LinkedQuiz(dummyUser, dummyQuiz, now, "IN PROGRESS", 0, now);
+        linkedQuiz.setId("linkedQuiz123");
+
+        when(userService.joinQuiz(userId, quizId)).thenReturn(linkedQuiz);
+
+        mockMvc.perform(post("/api/user/join")
+                        .param("userId", userId)
+                        .param("quizId", quizId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testSubmitResponse_Success() throws Exception {
+        String linkedQuizId = "linkedQuiz123";
+        String questionId = "question123";
+
+        LinkedQuiz dummyLinkedQuiz = Mockito.mock(LinkedQuiz.class);
+        Question dummyQuestion = Mockito.mock(Question.class);
+        when(dummyQuestion.getAnswers()).thenReturn(List.of("correctAnswer"));
+
+        ResponseDto responseDto = new ResponseDto("correctAnswer");
+
+        boolean isCorrect = dummyQuestion.getAnswers().contains(responseDto.getResponse());
+
+        Date now = new Date();
+        Response response = new Response(dummyLinkedQuiz, dummyQuestion, responseDto.getResponse(), isCorrect, now);
+        response.setId("response123");
+
+        when(userService.submitResponse(eq(linkedQuizId), eq(questionId), any(ResponseDto.class)))
+                .thenReturn(response);
+
+        String responseJson = objectMapper.writeValueAsString(responseDto);
+
+        mockMvc.perform(post("/api/user/submit")
+                        .param("linkedQuizId", linkedQuizId)
+                        .param("questionId", questionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(responseJson))
+                .andExpect(status().isOk());
+    }
 
 
 }
