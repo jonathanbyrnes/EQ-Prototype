@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -152,7 +153,7 @@ public class UserService {
     public QuizSummaryDto completeQuiz(String linkedQuizId) {
         LinkedQuiz linkedQuiz = getLinkedQuizById(linkedQuizId);
 
-        if(!linkedQuiz.getStatus().equals("COMPLETE")) {
+        if (!linkedQuiz.getStatus().equals("COMPLETE")) {
             linkedQuiz.setStatus("COMPLETE");
             this.linkedQuizRepository.save(linkedQuiz);
         }
@@ -169,6 +170,21 @@ public class UserService {
 
         return new QuizSummaryDto(
                 linkedQuizId, totalQuestions, correctAnswers, linkedQuiz.getScore());
+    }
+
+    public List<QuizSummaryDto> getAllResults(String userId) {
+        List<LinkedQuiz> linkedQuizzes = this.linkedQuizRepository.findByUser_Id(userId);
+
+        return linkedQuizzes.stream().map(linkedQuiz -> {
+            List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuiz.getId());
+            long correctAnswers = responses.stream().filter(Response::isCorrect).count();
+
+            return new QuizSummaryDto(
+                    linkedQuiz.getId(),
+                    (int) this.linkedQuizRepository.countByQuiz_Id(linkedQuiz.getQuiz().getId()),
+                    (int) correctAnswers,
+                    linkedQuiz.getScore());
+        }).collect(Collectors.toList());
     }
 
     private User getUserByEmail(String email) {
