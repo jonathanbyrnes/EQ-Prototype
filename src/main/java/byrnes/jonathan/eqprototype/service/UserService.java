@@ -187,6 +187,38 @@ public class UserService {
         }).collect(Collectors.toList());
     }
 
+    public QuizAggregateDto getQuizAggregate(String quizId) {
+        List<LinkedQuiz> allAttempts = linkedQuizRepository.findByQuiz_Id(quizId);
+        int totalStarted = allAttempts.size();
+
+        List<LinkedQuiz> completedAttempts = allAttempts.stream()
+                .filter(quiz -> "COMPLETE".equals(quiz.getStatus()))
+                .toList();
+        int totalCompleted = completedAttempts.size();
+
+        int sumScore = 0;
+        int highestScore = 0;
+        int lowestScore = Integer.MAX_VALUE;
+
+        for (LinkedQuiz attempt : completedAttempts) {
+            int score = attempt.getScore();
+            sumScore += score;
+            if (score > highestScore) {
+                highestScore = score;
+            }
+            if (score < lowestScore) {
+                lowestScore = score;
+            }
+        }
+
+        double averageScore = totalCompleted > 0 ? (double) sumScore / totalCompleted : 0;
+        if (totalCompleted == 0) {
+            lowestScore = 0;
+        }
+
+        return new QuizAggregateDto(quizId, totalStarted, totalCompleted, averageScore, highestScore, lowestScore);
+    }
+
     private User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("This email cannot be found."));
