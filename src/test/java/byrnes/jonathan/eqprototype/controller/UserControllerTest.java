@@ -82,8 +82,8 @@ public class UserControllerTest {
                 "", "password123");
 
         mockMvc.perform(post("/api/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userDto)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -93,8 +93,8 @@ public class UserControllerTest {
         String invalidJson = "{ \"email\": \"test@example.com\", \"password\": }";
 
         mockMvc.perform(post("/api/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidJson))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
                 .andExpect(status().isBadRequest());
     }
 
@@ -233,6 +233,18 @@ public class UserControllerTest {
 
         mockMvc.perform(get("/api/user/results")
                         .param("userId", userId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetQuizAggregate_Success() throws Exception {
+        String quizId = "quiz123";
+        QuizAggregateDto aggregate = new QuizAggregateDto(quizId, 100, 80, 85.5, 100, 60);
+
+        when(userService.getQuizAggregate(quizId)).thenReturn(aggregate);
+
+        mockMvc.perform(get("/api/user/aggregate")
+                        .param("quizId", quizId))
                 .andExpect(status().isOk());
     }
 
