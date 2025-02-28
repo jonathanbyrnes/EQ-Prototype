@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -60,6 +62,11 @@ public class UserController {
     @PostMapping("/complete")
     public ResponseEntity<QuizSummaryDto> completeQuiz(@RequestParam String linkedQuizId) {
         return ResponseEntity.ok(this.userService.completeQuiz(linkedQuizId));
+    }
+
+    @GetMapping("/results")
+    public ResponseEntity<List<QuizSummaryDto>> getAllResults(@RequestParam String userId) {
+        return ResponseEntity.ok(userService.getAllResults(userId));
     }
 
 

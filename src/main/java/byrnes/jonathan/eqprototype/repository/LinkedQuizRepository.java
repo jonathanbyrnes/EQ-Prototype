@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface LinkedQuizRepository extends MongoRepository<LinkedQuiz, String> {
     List<LinkedQuiz> findByStatus(String status);
+    List<LinkedQuiz> findByUser_Id(String userId);
+    long countByQuiz_Id(String quizId);
 }
