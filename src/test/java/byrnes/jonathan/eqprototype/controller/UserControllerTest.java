@@ -17,14 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -218,6 +218,21 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/user/complete")
                         .param("linkedQuizId", linkedQuizId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetAllQuizResults_Success() throws Exception {
+        String userId = "user1";
+        List<QuizSummaryDto> summaries = Arrays.asList(
+                new QuizSummaryDto("quiz1", 10, 8, 80),
+                new QuizSummaryDto("quiz2", 15, 12, 120)
+        );
+
+        when(userService.getAllResults(userId)).thenReturn(summaries);
+
+        mockMvc.perform(get("/api/user/results")
+                        .param("userId", userId))
                 .andExpect(status().isOk());
     }
 
