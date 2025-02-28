@@ -66,7 +66,12 @@ public class UserController {
 
     @GetMapping("/results")
     public ResponseEntity<List<QuizSummaryDto>> getAllResults(@RequestParam String userId) {
-        return ResponseEntity.ok(userService.getAllResults(userId));
+        return ResponseEntity.ok(this.userService.getAllResults(userId));
+    }
+
+    @GetMapping("/aggregate")
+    public ResponseEntity<QuizAggregateDto> getQuizAggregate(@RequestParam String quizId) {
+        return ResponseEntity.ok(this.userService.getQuizAggregate(quizId));
     }
 
 
