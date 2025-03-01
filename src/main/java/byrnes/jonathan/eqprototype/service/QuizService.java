@@ -3,9 +3,7 @@ package byrnes.jonathan.eqprototype.service;
 import byrnes.jonathan.eqprototype.dto.CreateQuizDto;
 import byrnes.jonathan.eqprototype.dto.EditQuizDto;
 import byrnes.jonathan.eqprototype.dto.ShareQuizDto;
-import byrnes.jonathan.eqprototype.model.Category;
 import byrnes.jonathan.eqprototype.model.Quiz;
-import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.repository.CategoryRepository;
 import byrnes.jonathan.eqprototype.repository.QuizRepository;
 import byrnes.jonathan.eqprototype.repository.UserRepository;
@@ -26,20 +24,14 @@ import java.util.Date;
 public class QuizService {
 
     private final QuizRepository quizRepository;
-    private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
 
     public QuizService(QuizRepository quizRepository, UserRepository userRepository, CategoryRepository categoryRepository) {
         this.quizRepository = quizRepository;
-        this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
     }
 
     public Quiz create(String userId, String categoryId, CreateQuizDto createQuizDto) {
-        User user = getUserById(userId);
-        Category category = getCategoryById(categoryId);
 
-        Quiz quiz = new Quiz(user, category, createQuizDto.getTitle(), createQuizDto.getDescription(),
+        Quiz quiz = new Quiz(userId, categoryId, createQuizDto.getTitle(), createQuizDto.getDescription(),
                 createQuizDto.isActive(), createQuizDto.isQuestionsRandomised(), new Date(), createQuizDto.isInstantFeedback());
 
         return this.quizRepository.save(quiz);
@@ -82,7 +74,7 @@ public class QuizService {
         Quiz quiz = getQuizById(quizId);
 
         Quiz newQuiz = new Quiz(
-                quiz.getUser(), quiz.getCategory(), quiz.getTitle(),
+                quiz.getUserId(), quiz.getCategoryId(), quiz.getTitle(),
                 quiz.getDescription(), quiz.isActive(), quiz.isQuestionsRandomised(), new Date(), quiz.isQuestionsRandomised()
         );
 
@@ -104,16 +96,6 @@ public class QuizService {
     private Quiz getQuizById(String quizId) {
         return quizRepository.findById(quizId)
                 .orElseThrow(() -> new IllegalArgumentException("Quiz cannot be found."));
-    }
-
-    private User getUserById(String userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User cannot be found."));
-    }
-
-    private Category getCategoryById(String categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category cannot be found."));
     }
 
 }

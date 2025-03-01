@@ -21,12 +21,10 @@ public class Response {
     private String id = UUID.randomUUID().toString();
 
     @NonNull
-    @DBRef
-    private LinkedQuiz linkedQuiz;
+    private String linkedQuizId;
 
     @NonNull
-    @DBRef
-    private Question question;
+    private String questionId;
 
     @NonNull
     private String responseStr;

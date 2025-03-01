@@ -42,16 +42,16 @@ public class UserService {
 
         Role role = getRoleByName("USER");
 
-        LinkedRole linkedRole = new LinkedRole(role);
+        LinkedRole linkedRole = new LinkedRole("null", role.getId());
 
         User user = new User(
-                linkedRole,
+                linkedRole.getId(),
                 userRegistrationDto.getEmail(),
                 userRegistrationDto.getPassword(),
                 new Date(),
                 false);
 
-        linkedRole.setUser(user);
+        linkedRole.setUserId(user.getId());
         this.linkedRoleRepository.save(linkedRole);
         return this.userRepository.save(user);
     }
@@ -87,7 +87,7 @@ public class UserService {
         String token = UUID.randomUUID().toString();
         Date expiryDate = new Date(System.currentTimeMillis() + 3600 * 1000); //1h from now
 
-        PasswordResetToken passwordResetToken = new PasswordResetToken(user, token, expiryDate);
+        PasswordResetToken passwordResetToken = new PasswordResetToken(user.getId(), token, expiryDate);
         this.passwordResetTokenRepository.save(passwordResetToken);
 
         return token;
@@ -101,7 +101,7 @@ public class UserService {
             throw new IllegalArgumentException("Token is invalid, or no longer valid.");
         }
 
-        User user = getUserById(passwordResetToken.getUser().getId());
+        User user = getUserById(passwordResetToken.getUserId());
 
         user.setPassword(resetPasswordDto.getPassword());
         this.passwordResetTokenRepository.delete(passwordResetToken);
@@ -109,11 +109,9 @@ public class UserService {
     }
 
     public LinkedQuiz joinQuiz(String userId, String quizId) {
-        User user = getUserById(userId);
-        Quiz quiz = getQuizById(quizId);
 
         LinkedQuiz linkedQuiz = new LinkedQuiz(
-                user, quiz, new Date(), "IN PROGRESS", 0, new Date(), new Date()
+                userId, quizId, new Date(), "IN PROGRESS", 0, new Date(), new Date()
         );
 
         return this.linkedQuizRepository.save(linkedQuiz);
@@ -140,8 +138,8 @@ public class UserService {
         }
 
         Response response = new Response(
-                linkedQuiz,
-                question,
+                linkedQuizId,
+                questionId,
                 responseDto.getResponse(),
                 isCorrect,
                 submissionTime
@@ -173,7 +171,7 @@ public class UserService {
     }
 
     public List<QuizSummaryDto> getAllResults(String userId) {
-        List<LinkedQuiz> linkedQuizzes = this.linkedQuizRepository.findByUser_Id(userId);
+        List<LinkedQuiz> linkedQuizzes = this.linkedQuizRepository.findByUserId(userId);
 
         return linkedQuizzes.stream().map(linkedQuiz -> {
             List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuiz.getId());
@@ -181,14 +179,14 @@ public class UserService {
 
             return new QuizSummaryDto(
                     linkedQuiz.getId(),
-                    (int) this.linkedQuizRepository.countByQuiz_Id(linkedQuiz.getQuiz().getId()),
+                    (int) this.linkedQuizRepository.countByQuizId(linkedQuiz.getQuizId()),
                     (int) correctAnswers,
                     linkedQuiz.getScore());
         }).collect(Collectors.toList());
     }
 
     public QuizAggregateDto getQuizAggregate(String quizId) {
-        List<LinkedQuiz> allAttempts = linkedQuizRepository.findByQuiz_Id(quizId);
+        List<LinkedQuiz> allAttempts = linkedQuizRepository.findByQuizId(quizId);
         int totalStarted = allAttempts.size();
 
         List<LinkedQuiz> completedAttempts = allAttempts.stream()
@@ -232,11 +230,6 @@ public class UserService {
     private Role getRoleByName(String roleName) {
         return this.roleRepository.findByName(roleName)
                 .orElseGet(() -> this.roleRepository.save(new Role(roleName)));
-    }
-
-    private Quiz getQuizById(String quizId) {
-        return this.quizRepository.findById(quizId)
-                .orElseThrow(() -> new IllegalArgumentException("This quiz cannot be found."));
     }
 
     private LinkedQuiz getLinkedQuizById(String linkedQuizId) {

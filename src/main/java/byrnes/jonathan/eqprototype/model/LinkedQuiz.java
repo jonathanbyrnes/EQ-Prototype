@@ -21,12 +21,10 @@ public class LinkedQuiz {
     private String id = UUID.randomUUID().toString();
 
     @NonNull
-    @DBRef
-    private User user;
+    private String userId;
 
     @NonNull
-    @DBRef
-    private Quiz quiz;
+    private String quizId;
 
     @NonNull
     private Date dateStarted;
