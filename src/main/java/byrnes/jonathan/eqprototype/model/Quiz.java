@@ -22,12 +22,10 @@ public class Quiz {
     private String id = generateQuizId();
 
     @NonNull
-    @DBRef
-    private User user;
+    private String userId;
 
     @NonNull
-    @DBRef
-    private Category category;
+    private String categoryId;
 
     @NonNull
     private String title;

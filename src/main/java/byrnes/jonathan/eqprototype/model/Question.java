@@ -21,12 +21,10 @@ public class Question {
     private String id = UUID.randomUUID().toString();
 
     @NonNull
-    @DBRef
-    private Quiz quiz;
+    private String quizId;
 
     @NonNull
-    @DBRef
-    private Type type;
+    private String typeId;
 
     @NonNull
     private String questionStr;

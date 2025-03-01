@@ -21,8 +21,7 @@ public class PasswordResetToken {
     private String id = UUID.randomUUID().toString();
 
     @NonNull
-    @DBRef
-    private User user;
+    private String userId;
 
     @NonNull
     private String token;

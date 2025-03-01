@@ -1,8 +1,8 @@
 package byrnes.jonathan.eqprototype.model;
 
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -19,11 +19,13 @@ public class User {
     @Id
     private String id;
 
-    @DBRef
-    private LinkedRole linkedRole;
+    @NonNull
+    private String linkedRoleId;
 
     @Email
+    @NonNull
     private String email;
+
 
     private String password;
 
@@ -31,7 +33,7 @@ public class User {
 
     private boolean isGuest;
 
-    public User(LinkedRole linkedRole, String email, String password, Date dateOfJoin, boolean isGuest) {
+    public User(String linkedRoleId, String email, String password, Date dateOfJoin, boolean isGuest) {
 
         if (isGuest) {
             this.setupGuestId();
@@ -39,7 +41,7 @@ public class User {
             this.id = UUID.randomUUID().toString();
         }
 
-        this.linkedRole = linkedRole;
+        this.linkedRoleId = linkedRoleId;
         this.email = email;
         this.password = password;
         this.dateOfJoin = dateOfJoin;

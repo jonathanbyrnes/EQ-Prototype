@@ -21,11 +21,10 @@ public class LinkedRole {
     @Id
     private String id = UUID.randomUUID().toString();
 
-    @DBRef
-    private User user;
+    @NonNull
+    private String userId;
 
     @NonNull
-    @DBRef
-    private Role role;
+    private String roleId;
 
 }
