@@ -185,6 +185,10 @@ public class UserService {
         }).collect(Collectors.toList());
     }
 
+    public List<Quiz> getAllQuizzes(String userId) {
+        return this.quizRepository.findByUserId(userId);
+    }
+
     public QuizAggregateDto getQuizAggregate(String quizId) {
         List<LinkedQuiz> allAttempts = linkedQuizRepository.findByQuizId(quizId);
         int totalStarted = allAttempts.size();
