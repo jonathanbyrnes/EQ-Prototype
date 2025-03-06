@@ -2,11 +2,16 @@ package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.CreateQuizDto;
 import byrnes.jonathan.eqprototype.dto.EditQuizDto;
+import byrnes.jonathan.eqprototype.dto.FullQuizDisplayDto;
 import byrnes.jonathan.eqprototype.dto.ShareQuizDto;
+import byrnes.jonathan.eqprototype.model.Category;
+import byrnes.jonathan.eqprototype.model.Question;
 import byrnes.jonathan.eqprototype.model.Quiz;
+import byrnes.jonathan.eqprototype.model.Type;
 import byrnes.jonathan.eqprototype.repository.CategoryRepository;
+import byrnes.jonathan.eqprototype.repository.QuestionRepository;
 import byrnes.jonathan.eqprototype.repository.QuizRepository;
-import byrnes.jonathan.eqprototype.repository.UserRepository;
+import byrnes.jonathan.eqprototype.repository.TypeRepository;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -17,16 +22,21 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Date;
+import java.util.*;
 
 @Service
 public class QuizService {
 
     private final QuizRepository quizRepository;
+    private final QuestionRepository questionRepository;
+    private final CategoryRepository categoryRepository;
+    private final TypeRepository typeRepository;
 
-    public QuizService(QuizRepository quizRepository, UserRepository userRepository, CategoryRepository categoryRepository) {
+    public QuizService(QuizRepository quizRepository, QuestionRepository questionRepository, CategoryRepository categoryRepository, TypeRepository typeRepository) {
         this.quizRepository = quizRepository;
+        this.questionRepository = questionRepository;
+        this.categoryRepository = categoryRepository;
+        this.typeRepository = typeRepository;
     }
 
     public Quiz create(String userId, String categoryId, CreateQuizDto createQuizDto) {
@@ -79,6 +89,33 @@ public class QuizService {
         );
 
         return this.quizRepository.save(newQuiz);
+    }
+
+    public FullQuizDisplayDto get(String quizId) {
+        Quiz quiz = getQuizById(quizId);
+        List<Question> questionList = this.questionRepository.findByQuizId(quizId);
+        List<Type> typeList = new ArrayList<>();
+
+        for(int i = 0; i < questionList.size(); i++) {
+            Optional<Type> typeOptional = this.typeRepository.findById(questionList.get(i).getTypeId());
+            if(typeOptional.isPresent()) {
+                Type type = typeOptional.get();
+                typeList.add(type);
+            }
+        }
+
+        Optional<Category> categoryOptional = this.categoryRepository.findById(quiz.getCategoryId());
+        if(categoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("This category does not exist.");
+        }
+        Category category = categoryOptional.get();
+
+        return new FullQuizDisplayDto(
+                quiz,
+                questionList,
+                typeList,
+                category.getName()
+        );
     }
 
     private byte[] generateQRCode(String text, int width, int height) {

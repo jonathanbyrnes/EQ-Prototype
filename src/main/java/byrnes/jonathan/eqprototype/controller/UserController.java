@@ -2,6 +2,7 @@ package byrnes.jonathan.eqprototype.controller;
 
 import byrnes.jonathan.eqprototype.dto.*;
 import byrnes.jonathan.eqprototype.model.LinkedQuiz;
+import byrnes.jonathan.eqprototype.model.Quiz;
 import byrnes.jonathan.eqprototype.model.Response;
 import byrnes.jonathan.eqprototype.model.User;
 import byrnes.jonathan.eqprototype.service.UserService;
@@ -72,6 +73,11 @@ public class UserController {
     @GetMapping("/aggregate")
     public ResponseEntity<QuizAggregateDto> getQuizAggregate(@RequestParam String quizId) {
         return ResponseEntity.ok(this.userService.getQuizAggregate(quizId));
+    }
+
+    @GetMapping("/quizzes")
+    public ResponseEntity<List<Quiz>> getAllQuizzes(@RequestParam String userId) {
+        return ResponseEntity.ok(this.userService.getAllQuizzes(userId));
     }
 
 
