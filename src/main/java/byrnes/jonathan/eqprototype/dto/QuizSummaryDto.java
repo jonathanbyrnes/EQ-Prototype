@@ -1,9 +1,13 @@
 package byrnes.jonathan.eqprototype.dto;
 
+import byrnes.jonathan.eqprototype.model.Question;
+import byrnes.jonathan.eqprototype.model.Response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,4 +25,11 @@ public class QuizSummaryDto {
 
     @NonNull
     private int score;
+
+    @NonNull
+    private List<Question> questionList;
+
+    @NonNull
+    private List<Response> responseList;
+
 }

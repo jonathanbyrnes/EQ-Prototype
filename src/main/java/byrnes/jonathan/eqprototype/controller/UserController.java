@@ -54,15 +54,17 @@ public class UserController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<Response> submitResponse(@RequestParam String linkedQuizId,
+    public ResponseEntity<Response> submitResponse(@RequestParam String quizId,
+                                                   @RequestParam String userId,
                                                    @RequestParam String questionId,
                                                    @Valid @RequestBody ResponseDto responseDto) {
-        return ResponseEntity.ok(this.userService.submitResponse(linkedQuizId, questionId, responseDto));
+        return ResponseEntity.ok(this.userService.submitResponse(quizId, userId, questionId, responseDto));
     }
 
     @PostMapping("/complete")
-    public ResponseEntity<QuizSummaryDto> completeQuiz(@RequestParam String linkedQuizId) {
-        return ResponseEntity.ok(this.userService.completeQuiz(linkedQuizId));
+    public ResponseEntity<QuizSummaryDto> completeQuiz(@RequestParam String quizId,
+                                                       @RequestParam String userId) {
+        return ResponseEntity.ok(this.userService.completeQuiz(quizId, userId));
     }
 
     @GetMapping("/results")

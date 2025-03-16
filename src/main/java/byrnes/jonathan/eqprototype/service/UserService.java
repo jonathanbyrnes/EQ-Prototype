@@ -5,10 +5,7 @@ import byrnes.jonathan.eqprototype.model.*;
 import byrnes.jonathan.eqprototype.repository.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,6 +106,10 @@ public class UserService {
     }
 
     public LinkedQuiz joinQuiz(String userId, String quizId) {
+        if(userId.isEmpty()) {
+            User user = createGuestUser();
+            userId = user.getId();
+        }
 
         LinkedQuiz linkedQuiz = new LinkedQuiz(
                 userId, quizId, new Date(), "IN PROGRESS", 0, new Date(), new Date()
@@ -117,8 +118,24 @@ public class UserService {
         return this.linkedQuizRepository.save(linkedQuiz);
     }
 
-    public Response submitResponse(String linkedQuizId, String questionId, ResponseDto responseDto) {
-        LinkedQuiz linkedQuiz = getLinkedQuizById(linkedQuizId);
+    private User createGuestUser() {
+        Role role = getRoleByName("USER");
+        LinkedRole linkedRole = new LinkedRole("null", role.getId());
+
+        User user = new User(
+                linkedRole.getId(),
+                "guestuser@example.com",
+                "",
+                new Date(),
+                true);
+
+        linkedRole.setUserId(user.getId());
+        this.linkedRoleRepository.save(linkedRole);
+        return this.userRepository.save(user);
+    }
+
+    public Response submitResponse(String quizId, String userId, String questionId, ResponseDto responseDto) {
+        LinkedQuiz linkedQuiz = getLinkedQuizByQuizIdAndUserId(quizId, userId);
         Question question = getQuestionById(questionId);
         linkedQuiz.setLastActivityTime(new Date());
 
@@ -138,7 +155,7 @@ public class UserService {
         }
 
         Response response = new Response(
-                linkedQuizId,
+                linkedQuiz.getId(),
                 questionId,
                 responseDto.getResponse(),
                 isCorrect,
@@ -148,16 +165,17 @@ public class UserService {
         return this.responseRepository.save(response);
     }
 
-    public QuizSummaryDto completeQuiz(String linkedQuizId) {
-        LinkedQuiz linkedQuiz = getLinkedQuizById(linkedQuizId);
+    public QuizSummaryDto completeQuiz(String quizId, String userId) {
+        LinkedQuiz linkedQuiz = getLinkedQuizByQuizIdAndUserId(quizId, userId);
 
         if (!linkedQuiz.getStatus().equals("COMPLETE")) {
             linkedQuiz.setStatus("COMPLETE");
             this.linkedQuizRepository.save(linkedQuiz);
         }
 
-        List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuizId);
+        List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuiz.getId());
         int totalQuestions = responses.size();
+        List<Question> questions = questionRepository.findByQuizId(linkedQuiz.getQuizId());
 
         int correctAnswers = 0;
         for (Response response : responses) {
@@ -167,7 +185,8 @@ public class UserService {
         }
 
         return new QuizSummaryDto(
-                linkedQuizId, totalQuestions, correctAnswers, linkedQuiz.getScore());
+                linkedQuiz.getId(), totalQuestions, correctAnswers, linkedQuiz.getScore(),
+                questions, responses);
     }
 
     public List<QuizSummaryDto> getAllResults(String userId) {
@@ -181,7 +200,9 @@ public class UserService {
                     linkedQuiz.getId(),
                     (int) this.linkedQuizRepository.countByQuizId(linkedQuiz.getQuizId()),
                     (int) correctAnswers,
-                    linkedQuiz.getScore());
+                    linkedQuiz.getScore(),
+                    new ArrayList<>(),
+                    responses);
         }).collect(Collectors.toList());
     }
 
@@ -239,6 +260,10 @@ public class UserService {
     private LinkedQuiz getLinkedQuizById(String linkedQuizId) {
         return this.linkedQuizRepository.findById(linkedQuizId)
                 .orElseThrow(() -> new IllegalArgumentException("This linked quiz cannot be found."));
+    }
+
+    private LinkedQuiz getLinkedQuizByQuizIdAndUserId(String quizId, String userId) {
+        return this.linkedQuizRepository.findByQuizIdAndUserId(quizId, userId);
     }
 
     private Question getQuestionById(String questionId) {

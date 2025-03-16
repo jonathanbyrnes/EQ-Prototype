@@ -11,5 +11,6 @@ public interface LinkedQuizRepository extends MongoRepository<LinkedQuiz, String
     List<LinkedQuiz> findByStatus(String status);
     List<LinkedQuiz> findByUserId(String userId);
     List<LinkedQuiz> findByQuizId(String quizId);
+    LinkedQuiz findByQuizIdAndUserId(String quizId, String userId);
     long countByQuizId(String quizId);
 }
