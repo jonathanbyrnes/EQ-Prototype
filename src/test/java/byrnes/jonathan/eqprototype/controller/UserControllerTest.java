@@ -168,7 +168,7 @@ public class UserControllerTest {
         Quiz dummyQuiz = Mockito.mock(Quiz.class);
 
         Date now = new Date();
-        LinkedQuiz linkedQuiz = new LinkedQuiz(dummyUser, dummyQuiz, now, "IN PROGRESS", 0, now, now);
+        LinkedQuiz linkedQuiz = new LinkedQuiz(dummyUser.getId(), dummyQuiz.getId(), now, "IN PROGRESS", 0, now, now);
         linkedQuiz.setId("linkedQuiz123");
 
         when(userService.joinQuiz(userId, quizId)).thenReturn(linkedQuiz);
@@ -182,6 +182,8 @@ public class UserControllerTest {
     @Test
     public void testSubmitResponse_Success() throws Exception {
         String linkedQuizId = "linkedQuiz123";
+        String userId = "userId123";
+        String quizId = "quizId123";
         String questionId = "question123";
 
         LinkedQuiz dummyLinkedQuiz = Mockito.mock(LinkedQuiz.class);
@@ -193,10 +195,10 @@ public class UserControllerTest {
         boolean isCorrect = dummyQuestion.getAnswers().contains(responseDto.getResponse());
 
         Date now = new Date();
-        Response response = new Response(dummyLinkedQuiz, dummyQuestion, responseDto.getResponse(), isCorrect, now);
+        Response response = new Response(dummyLinkedQuiz.getId(), dummyQuestion.getId(), responseDto.getResponse(), isCorrect, now);
         response.setId("response123");
 
-        when(userService.submitResponse(eq(linkedQuizId), eq(questionId), any(ResponseDto.class)))
+        when(userService.submitResponse(eq(quizId), eq(userId), eq(questionId), any(ResponseDto.class)))
                 .thenReturn(response);
 
         String responseJson = objectMapper.writeValueAsString(responseDto);
@@ -211,10 +213,12 @@ public class UserControllerTest {
 
     @Test
     public void testCompleteQuiz_Success() throws Exception {
+        String userId = "userId123";
+        String quizId = "quizId123";
         String linkedQuizId = "test-quiz-id";
         QuizSummaryDto summary = new QuizSummaryDto(linkedQuizId, 10, 7, 70);
 
-        when(userService.completeQuiz(linkedQuizId)).thenReturn(summary);
+        when(userService.completeQuiz(userId, quizId)).thenReturn(summary);
 
         mockMvc.perform(post("/api/user/complete")
                         .param("linkedQuizId", linkedQuizId))
