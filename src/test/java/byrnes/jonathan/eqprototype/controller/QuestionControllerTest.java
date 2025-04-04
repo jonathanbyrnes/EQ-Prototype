@@ -51,7 +51,7 @@ public class QuestionControllerTest {
         List<String> answers = Arrays.asList("Correct Answer");
         List<String> options = Arrays.asList("Option1", "Option2", "Option3");
         CreateQuestionDto createQuestionDto = new CreateQuestionDto(
-                "What is 2+2?", 30, 10, answers, options, 1);
+                "What is 2+2?", 30, 10, answers, options, 1, "none", "none", "none");
 
         Question question = createFakeQuestion(createQuestionDto);
 
@@ -73,12 +73,14 @@ public class QuestionControllerTest {
                 30,
                 10,
                 List.of("Paris", "London"),
-                List.of("Option1", "Option2"), 1);
+                List.of("Option1", "Option2"), 1,
+                "type123", "none", "none",
+                "none");
 
         CreateQuestionDto createQuestionDto = new CreateQuestionDto(
                 "What is 2+2?", 10, 30,
                 List.of("England", "France"),
-                List.of("Option2", "Option1"),2);
+                List.of("Option2", "Option1"),2, "none", "none", "none");
 
         Question question = createFakeQuestion(createQuestionDto);
 
@@ -99,21 +101,21 @@ public class QuestionControllerTest {
 
     private Question createFakeQuestion(CreateQuestionDto createQuestionDto) {
         Category category = new Category("None");
-        LinkedRole linkedRole = new LinkedRole(new Role("USER"));
+        LinkedRole linkedRole = new LinkedRole("userId", "roleId");
         User user = new User(
-                linkedRole, "email", "password", new Date(), false
+                linkedRole.getId(), "email", "password", new Date(), false
         );
         Quiz quiz = new Quiz(
-                user, category, "Title", "Description", false, false, new Date(), false
+                "userId", category.getId(), "Title", "Description", false, false, new Date(), false
         );
         quiz.setId("quiz123");
         Type type = new Type("MCQ");
         type.setId("type123");
 
         return new Question(
-                quiz, type, createQuestionDto.getQuestionStr(), createQuestionDto.getTimeLimit(),
+                "quiz123", "type123", createQuestionDto.getQuestionStr(), createQuestionDto.getTimeLimit(),
                 createQuestionDto.getWorth(), createQuestionDto.getAnswers(), createQuestionDto.getOptions(),
-                createQuestionDto.getQuestionNum()
+                createQuestionDto.getQuestionNum(), "none", "none", "none"
         );
     }
 

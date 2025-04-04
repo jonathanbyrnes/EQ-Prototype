@@ -14,8 +14,10 @@ public class EditQuizDto {
     @NotBlank(message = "You must enter a title.")
     private String title;
 
-    @NotBlank(message = "You must enter a description.")
     private String description;
+
+    @NotNull(message = "You must select a category.")
+    private String categoryId;
 
     @NotNull(message = "You must select an activity status.")
     private boolean isActive;

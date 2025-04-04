@@ -62,9 +62,9 @@ public class UserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
-        LinkedRole linkedRole = new LinkedRole(role);
-        User savedUser = new User(linkedRole, userDto.getEmail(), userDto.getPassword(), new Date(), false);
-        linkedRole.setUser(savedUser);
+        LinkedRole linkedRole = new LinkedRole(userCaptor.getValue().getId(), roleRepository.findByName("USER").get().getId());
+        User savedUser = new User(linkedRole.getId(), userDto.getEmail(), userDto.getPassword(), new Date(), false);
+        linkedRole.setUserId(savedUser.getId());
 
         when(userRepository.save(any(User.class)))
                 .thenReturn(savedUser);
@@ -142,7 +142,7 @@ public class UserServiceTest {
         userService.register(userDto);
         verify(linkedRoleRepository).save(linkedRoleCaptor.capture());
 
-        assertThat(linkedRoleCaptor.getValue().getRole().getName())
+        assertThat(roleRepository.findById(linkedRoleCaptor.getValue().getRoleId()).get().getName())
                 .isEqualTo("USER");
     }
 

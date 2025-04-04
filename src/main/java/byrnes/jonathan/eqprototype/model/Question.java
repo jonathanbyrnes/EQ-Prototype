@@ -44,4 +44,13 @@ public class Question {
     @NonNull
     private int questionNum;
 
+    @NonNull
+    private String nextQuestionCorrect;
+
+    @NonNull
+    private String nextQuestionIncorrect;
+
+    @NonNull
+    private String mediaUrl;
+
 }

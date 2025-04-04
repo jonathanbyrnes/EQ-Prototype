@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.List;
@@ -26,8 +27,22 @@ public class EditQuestionDto {
     @NotEmpty(message = "You must enter an answer.")
     private List<String> answers;
 
+    @NotEmpty(message = "You must have atleast one option")
     private List<String> options;
 
     @NotNull
     private int questionNum;
+
+    @NonNull
+    private String typeId;
+
+    @NonNull
+    private String nextQuestionCorrect;
+
+    @NonNull
+    private String nextQuestionIncorrect;
+
+    @NonNull
+    private String mediaUrl;
+
 }
