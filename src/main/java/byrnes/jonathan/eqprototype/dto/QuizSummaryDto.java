@@ -1,7 +1,6 @@
 package byrnes.jonathan.eqprototype.dto;
 
-import byrnes.jonathan.eqprototype.model.Question;
-import byrnes.jonathan.eqprototype.model.Response;
+import byrnes.jonathan.eqprototype.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -15,7 +14,13 @@ import java.util.List;
 public class QuizSummaryDto {
 
     @NonNull
-    private String linkedQuizId;
+    private LinkedQuiz linkedQuiz;
+
+    @NonNull
+    private Quiz quiz;
+
+    @NonNull
+    private String categoryName;
 
     @NonNull
     private int totalQuestions;

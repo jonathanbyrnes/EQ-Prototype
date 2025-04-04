@@ -27,4 +27,13 @@ public class QuizAggregateDto {
 
     @NonNull
     private int lowestScore;
+
+    @NonNull
+    private double dropoutRate;
+
+    @NonNull
+    private double medianScore;
+
+    @NonNull
+    private long averageCompletionTime;
 }

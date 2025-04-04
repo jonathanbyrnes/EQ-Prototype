@@ -77,10 +77,21 @@ public class UserController {
         return ResponseEntity.ok(this.userService.getQuizAggregate(quizId));
     }
 
+    @PostMapping("/aggregate/clear")
+    public ResponseEntity<Void> clearQuizAggregate(@RequestParam String quizId) {
+        return this.userService.clearQuizAggregate(quizId);
+    }
+
     @GetMapping("/quizzes")
     public ResponseEntity<List<Quiz>> getAllQuizzes(@RequestParam String userId) {
         return ResponseEntity.ok(this.userService.getAllQuizzes(userId));
     }
+
+    @GetMapping("/responses")
+    public ResponseEntity<List<Response>> getResponses(@RequestParam String linkedQuizId) {
+        return ResponseEntity.ok(this.userService.getResponses(linkedQuizId));
+    }
+
 
 
 

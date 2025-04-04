@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -216,7 +217,9 @@ public class UserControllerTest {
         String userId = "userId123";
         String quizId = "quizId123";
         String linkedQuizId = "test-quiz-id";
-        QuizSummaryDto summary = new QuizSummaryDto(linkedQuizId, 10, 7, 70);
+        LinkedQuiz linkedQuiz = new LinkedQuiz(userId, quizId, new Date(), "IN PROGRESS", 0, new Date(), new Date());
+        Quiz quiz = new Quiz(userId, "categoryId", "title", "description", false, false, new Date(), false);
+        QuizSummaryDto summary = new QuizSummaryDto(linkedQuiz, quiz, "categoryName", 70, 2, 0, new ArrayList<>(), new ArrayList<>());
 
         when(userService.completeQuiz(userId, quizId)).thenReturn(summary);
 
@@ -228,9 +231,11 @@ public class UserControllerTest {
     @Test
     public void testGetAllQuizResults_Success() throws Exception {
         String userId = "user1";
+        LinkedQuiz linkedQuiz = new LinkedQuiz(userId, "quiz1", new Date(), "IN PROGRESS", 0, new Date(), new Date());
+        Quiz quiz = new Quiz(userId, "categoryId", "title", "description", false, false, new Date(), false);
         List<QuizSummaryDto> summaries = Arrays.asList(
-                new QuizSummaryDto("quiz1", 10, 8, 80),
-                new QuizSummaryDto("quiz2", 15, 12, 120)
+                new QuizSummaryDto(linkedQuiz, quiz, "categoryName", 80, 2, 0, new ArrayList<>(), new ArrayList<>()),
+                new QuizSummaryDto(linkedQuiz, quiz, "categoryName", 120, 3, 0, new ArrayList<>(), new ArrayList<>())
         );
 
         when(userService.getAllResults(userId)).thenReturn(summaries);
@@ -243,7 +248,7 @@ public class UserControllerTest {
     @Test
     public void testGetQuizAggregate_Success() throws Exception {
         String quizId = "quiz123";
-        QuizAggregateDto aggregate = new QuizAggregateDto(quizId, 100, 80, 85.5, 100, 60);
+        QuizAggregateDto aggregate = new QuizAggregateDto(quizId, 100, 80, 85.5, 100, 60, 0, 0, 0);
 
         when(userService.getQuizAggregate(quizId)).thenReturn(aggregate);
 

@@ -3,6 +3,7 @@ package byrnes.jonathan.eqprototype.service;
 import byrnes.jonathan.eqprototype.dto.*;
 import byrnes.jonathan.eqprototype.model.*;
 import byrnes.jonathan.eqprototype.repository.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,8 +20,9 @@ public class UserService {
     private final LinkedQuizRepository linkedQuizRepository;
     private final QuestionRepository questionRepository;
     private final ResponseRepository responseRepository;
+    private final CategoryRepository categoryRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, LinkedRoleRepository linkedRoleRepository, PasswordResetTokenRepository passwordResetTokenRepository, QuizRepository quizRepository, LinkedQuizRepository linkedQuizRepository, QuestionRepository questionRepository, ResponseRepository responseRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, LinkedRoleRepository linkedRoleRepository, PasswordResetTokenRepository passwordResetTokenRepository, QuizRepository quizRepository, LinkedQuizRepository linkedQuizRepository, QuestionRepository questionRepository, ResponseRepository responseRepository, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.linkedRoleRepository = linkedRoleRepository;
@@ -29,6 +31,7 @@ public class UserService {
         this.linkedQuizRepository = linkedQuizRepository;
         this.questionRepository = questionRepository;
         this.responseRepository = responseRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public User register(UserRegistrationDto userRegistrationDto) {
@@ -106,9 +109,14 @@ public class UserService {
     }
 
     public LinkedQuiz joinQuiz(String userId, String quizId) {
-        if(userId.isEmpty()) {
+        if (userId.isEmpty()) {
             User user = createGuestUser();
             userId = user.getId();
+        }
+
+        Quiz quiz = getQuizById(quizId);
+        if (!quiz.isActive()) {
+            throw new IllegalArgumentException("This is not an active quiz.");
         }
 
         LinkedQuiz linkedQuiz = new LinkedQuiz(
@@ -134,6 +142,10 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+    public List<Response> getResponses(String linkedQuizId) {
+        return this.responseRepository.findByLinkedQuizId(linkedQuizId);
+    }
+
     public Response submitResponse(String quizId, String userId, String questionId, ResponseDto responseDto) {
         LinkedQuiz linkedQuiz = getLinkedQuizByQuizIdAndUserId(quizId, userId);
         Question question = getQuestionById(questionId);
@@ -145,9 +157,24 @@ public class UserService {
         long timeLimitMillis = question.getTimeLimit() * 1000L;
 
         boolean isWithinTime = elapsedMillis <= timeLimitMillis;
+        boolean isCorrect = false;
 
-        boolean isCorrect = question.getAnswers().contains(responseDto.getResponse())
-                && isWithinTime;
+        if (question.getTypeId().equals("af985451-f819-4402-bf14-cda2a6e0e39e") ||
+                question.getTypeId().equals("zg985451-f819-4402-bf14-cda2a6b0e39e")) {
+            //match up & ordering logic
+            List<String> userResponse = Arrays.stream(responseDto.getResponse().split(","))
+                    .map(String::trim)
+                    .toList();
+            if (userResponse.equals(question.getOptions()) && isWithinTime) {
+                isCorrect = true;
+            }
+        } else {
+            //mcq logic
+            isCorrect = question.getAnswers().stream()
+                    .map(answer -> answer.trim().toLowerCase())
+                    .anyMatch(correctAnswer -> correctAnswer.equals(responseDto.getResponse().trim().toLowerCase()))
+                    && isWithinTime;
+        }
 
         if (isCorrect) {
             linkedQuiz.setScore(linkedQuiz.getScore() + question.getWorth());
@@ -173,48 +200,82 @@ public class UserService {
             this.linkedQuizRepository.save(linkedQuiz);
         }
 
+        Quiz quiz = getQuizById(linkedQuiz.getQuizId());
+        String categoryName = getCategoryById(quiz.getCategoryId()).getName();
+        List<Question> questions = questionRepository.findByQuizId(quiz.getId());
         List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuiz.getId());
-        int totalQuestions = responses.size();
-        List<Question> questions = questionRepository.findByQuizId(linkedQuiz.getQuizId());
 
-        int correctAnswers = 0;
-        for (Response response : responses) {
-            if (response.isCorrect()) {
-                correctAnswers++;
-            }
-        }
+        int correctAnswers = (int) responses.stream().filter(Response::isCorrect).count();
+        int totalQuestions = questions.size();
 
         return new QuizSummaryDto(
-                linkedQuiz.getId(), totalQuestions, correctAnswers, linkedQuiz.getScore(),
-                questions, responses);
+                linkedQuiz,
+                quiz,
+                categoryName,
+                totalQuestions,
+                correctAnswers,
+                linkedQuiz.getScore(),
+                questions,
+                responses
+        );
     }
+
 
     public List<QuizSummaryDto> getAllResults(String userId) {
         List<LinkedQuiz> linkedQuizzes = this.linkedQuizRepository.findByUserId(userId);
 
         return linkedQuizzes.stream().map(linkedQuiz -> {
+            Quiz quiz = getQuizById(linkedQuiz.getQuizId());
+            String categoryName = getCategoryById(quiz.getCategoryId()).getName();
+            List<Question> questions = questionRepository.findByQuizId(quiz.getId());
             List<Response> responses = responseRepository.findByLinkedQuizId(linkedQuiz.getId());
-            long correctAnswers = responses.stream().filter(Response::isCorrect).count();
+
+            int correctAnswers = (int) responses.stream().filter(Response::isCorrect).count();
+            int totalQuestions = questions.size();
 
             return new QuizSummaryDto(
-                    linkedQuiz.getId(),
-                    (int) this.linkedQuizRepository.countByQuizId(linkedQuiz.getQuizId()),
-                    (int) correctAnswers,
+                    linkedQuiz,
+                    quiz,
+                    categoryName,
+                    totalQuestions,
+                    correctAnswers,
                     linkedQuiz.getScore(),
-                    new ArrayList<>(),
-                    responses);
+                    questions,
+                    responses
+            );
         }).collect(Collectors.toList());
     }
+
 
     public List<Quiz> getAllQuizzes(String userId) {
         return this.quizRepository.findByUserId(userId);
     }
 
+    public ResponseEntity<Void> clearQuizAggregate(String quizId) {
+        Date resetTime = new Date();
+        List<LinkedQuiz> attempts = linkedQuizRepository.findByQuizId(quizId);
+        for (LinkedQuiz attempt : attempts) {
+            if (attempt.getLastActivityTime().before(resetTime)) {
+                attempt.setStatus("CLEARED");
+                linkedQuizRepository.save(attempt);
+            }
+        }
+        return ResponseEntity.ok().build();
+    }
+
     public QuizAggregateDto getQuizAggregate(String quizId) {
         List<LinkedQuiz> allAttempts = linkedQuizRepository.findByQuizId(quizId);
-        int totalStarted = allAttempts.size();
 
-        List<LinkedQuiz> completedAttempts = allAttempts.stream()
+        List<LinkedQuiz> trackedAttempts = new ArrayList<>();
+        for (LinkedQuiz attempt : allAttempts) {
+            if (!attempt.getStatus().equals("CLEARED")) {
+                trackedAttempts.add(attempt);
+            }
+        }
+
+        int totalStarted = trackedAttempts.size();
+
+        List<LinkedQuiz> completedAttempts = trackedAttempts.stream()
                 .filter(quiz -> "COMPLETE".equals(quiz.getStatus()))
                 .toList();
         int totalCompleted = completedAttempts.size();
@@ -222,16 +283,22 @@ public class UserService {
         int sumScore = 0;
         int highestScore = 0;
         int lowestScore = Integer.MAX_VALUE;
+        List<Integer> scores = new ArrayList<>();
+        List<Long> completionTimes = new ArrayList<>();
 
         for (LinkedQuiz attempt : completedAttempts) {
             int score = attempt.getScore();
             sumScore += score;
+            scores.add(score);
             if (score > highestScore) {
                 highestScore = score;
             }
             if (score < lowestScore) {
                 lowestScore = score;
             }
+            long completionTimeMillis = attempt.getLastActivityTime().getTime() - attempt.getDateStarted().getTime();
+            long seconds = completionTimeMillis / 1000;
+            completionTimes.add(seconds);
         }
 
         double averageScore = totalCompleted > 0 ? (double) sumScore / totalCompleted : 0;
@@ -239,8 +306,41 @@ public class UserService {
             lowestScore = 0;
         }
 
-        return new QuizAggregateDto(quizId, totalStarted, totalCompleted, averageScore, highestScore, lowestScore);
+        double dropoutRate = totalStarted > 0 ? ((totalStarted - totalCompleted) / (double) totalStarted) * 100 : 0;
+
+        double medianScore = 0;
+        if (!scores.isEmpty()) {
+            Collections.sort(scores);
+            int middle = scores.size() / 2;
+            if (scores.size() % 2 == 0) {
+                medianScore = (scores.get(middle - 1) + scores.get(middle)) / 2.0;
+            } else {
+                medianScore = scores.get(middle);
+            }
+        }
+
+        long avgCompletionTime = 0;
+        if (!completionTimes.isEmpty()) {
+            long sumCompletionTime = 0;
+            for (long ct : completionTimes) {
+                sumCompletionTime += ct;
+            }
+            avgCompletionTime = sumCompletionTime / completionTimes.size();
+        }
+
+        return new QuizAggregateDto(
+                quizId,
+                totalStarted,
+                totalCompleted,
+                averageScore,
+                highestScore,
+                lowestScore,
+                dropoutRate,
+                medianScore,
+                avgCompletionTime
+        );
     }
+
 
     private User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email)
@@ -262,13 +362,23 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("This linked quiz cannot be found."));
     }
 
-    private LinkedQuiz getLinkedQuizByQuizIdAndUserId(String quizId, String userId) {
+    public LinkedQuiz getLinkedQuizByQuizIdAndUserId(String quizId, String userId) {
         return this.linkedQuizRepository.findByQuizIdAndUserId(quizId, userId);
     }
 
     private Question getQuestionById(String questionId) {
         return this.questionRepository.findById(questionId)
                 .orElseThrow(() -> new IllegalArgumentException("This question cannot be found."));
+    }
+
+    private Quiz getQuizById(String quizId) {
+        return this.quizRepository.findById(quizId)
+                .orElseThrow(() -> new IllegalArgumentException("This quiz cannot be found."));
+    }
+
+    private Category getCategoryById(String categoryId) {
+        return this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("This category cannot be found."));
     }
 
 }

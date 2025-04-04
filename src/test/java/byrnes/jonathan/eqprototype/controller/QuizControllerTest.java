@@ -84,7 +84,7 @@ public class QuizControllerTest {
 
     @Test
     void testEdit_Success() throws Exception {
-        EditQuizDto editQuizDto = new EditQuizDto("New Quiz Title", "Updated quiz description", true, true, true);
+        EditQuizDto editQuizDto = new EditQuizDto("New Quiz Title", "Updated quiz description", "categoryId", true, true, true);
 
         CreateQuizDto createQuizDto = new CreateQuizDto(
                 "Test Quiz", "Test quiz description", false, false, false);
@@ -131,15 +131,15 @@ public class QuizControllerTest {
 
     private Quiz createFakeQuiz(CreateQuizDto createQuizDto) {
         Category category = new Category("None");
-        LinkedRole linkedRole = new LinkedRole(new Role("USER"));
+        LinkedRole linkedRole = new LinkedRole("userId", "roleId");
         User user = new User(
-                linkedRole, "email", "password", new Date(), false
+                linkedRole.getId(), "email", "password", new Date(), false
         );
         user.setId("user123");
         category.setId("category123");
 
         return new Quiz(
-                user, category, createQuizDto.getTitle(), createQuizDto.getDescription(),
+                "user123", "category123", createQuizDto.getTitle(), createQuizDto.getDescription(),
                 createQuizDto.isActive(), createQuizDto.isQuestionsRandomised(), new Date(), createQuizDto.isInstantFeedback());
     }
 

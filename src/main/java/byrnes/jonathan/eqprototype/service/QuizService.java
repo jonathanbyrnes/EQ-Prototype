@@ -54,7 +54,7 @@ public class QuizService {
             throw new IllegalArgumentException("This quiz is not active.");
         }
 
-        String link = "https://localhost:8080/api/join/" + quizId;
+        String link = "http://localhost:5173/?quizCode=" + quizId;
 
         //QR Code API
         byte[] qrCodeBytes = generateQRCode(link, 250, 250);
@@ -68,9 +68,12 @@ public class QuizService {
 
         quiz.setTitle(editQuizDto.getTitle());
         quiz.setDescription(editQuizDto.getDescription());
+        quiz.setCategoryId(editQuizDto.getCategoryId());
         quiz.setActive(editQuizDto.isActive());
+        quiz.setQuestionsRandomised(editQuizDto.isQuestionsRandomised());
+        quiz.setInstantFeedback(editQuizDto.isInstantFeedback());
 
-        return quizRepository.save(quiz);
+        return this.quizRepository.save(quiz);
     }
 
     public ResponseEntity<Void> delete(String quizId) {
@@ -88,6 +91,23 @@ public class QuizService {
                 quiz.getDescription(), quiz.isActive(), quiz.isQuestionsRandomised(), new Date(), quiz.isQuestionsRandomised()
         );
 
+        List<Question> questions = this.questionRepository.findByQuizId(quiz.getId());
+        for (Question question : questions) {
+            Question newQuestion = new Question(
+                    newQuiz.getId(),
+                    question.getTypeId(),
+                    question.getQuestionStr(),
+                    question.getTimeLimit(),
+                    question.getWorth(),
+                    question.getAnswers(),
+                    question.getOptions(),
+                    question.getQuestionNum(),
+                    question.getNextQuestionCorrect(),
+                    question.getNextQuestionIncorrect(),
+                    question.getMediaUrl()
+            );
+            this.questionRepository.save(newQuestion);
+        }
         return this.quizRepository.save(newQuiz);
     }
 

@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/question")
 public class QuestionController {
@@ -28,6 +30,16 @@ public class QuestionController {
     public ResponseEntity<Question> edit(@RequestParam String questionId,
                                          @Valid @RequestBody EditQuestionDto editQuestionDto) {
         return ResponseEntity.ok(this.questionService.edit(questionId, editQuestionDto));
+    }
+
+    @GetMapping("/get")
+    public ResponseEntity<List<Question>> get(@RequestParam String userId) {
+        return ResponseEntity.ok(this.questionService.getQuestionsByUserId(userId));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> delete(@RequestParam String questionId) {
+        return this.questionService.delete(questionId);
     }
 
 }

@@ -1,7 +1,10 @@
 package byrnes.jonathan.eqprototype.service;
 
 import byrnes.jonathan.eqprototype.dto.CreateCategoryDto;
+import byrnes.jonathan.eqprototype.dto.EditCategoryDto;
+import byrnes.jonathan.eqprototype.dto.EditQuizDto;
 import byrnes.jonathan.eqprototype.model.Category;
+import byrnes.jonathan.eqprototype.model.Quiz;
 import byrnes.jonathan.eqprototype.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +31,23 @@ public class CategoryService {
         return this.categoryRepository.save(category);
     }
 
+    public Category get(String categoryId) {
+        return getCategoryById(categoryId);
+    }
+
+    public Category edit(String categoryId, EditCategoryDto editCategoryDto) {
+        Category category = getCategoryById(categoryId);
+        category.setName(editCategoryDto.getName());
+
+        return this.categoryRepository.save(category);
+    }
+
     public List<Category> getAll() {
         return this.categoryRepository.findAll();
+    }
+
+    private Category getCategoryById(String categoryId) {
+        return this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("This category does not exist"));
     }
 }
