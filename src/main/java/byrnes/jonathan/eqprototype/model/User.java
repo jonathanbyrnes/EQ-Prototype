@@ -1,5 +1,6 @@
 package byrnes.jonathan.eqprototype.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NonNull;
@@ -27,6 +28,7 @@ public class User {
     private String email;
 
 
+    @JsonIgnore
     private String password;
 
     private Date dateOfJoin;
