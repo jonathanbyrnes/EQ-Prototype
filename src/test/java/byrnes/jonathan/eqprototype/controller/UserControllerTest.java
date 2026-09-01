@@ -8,10 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -165,11 +163,8 @@ public class UserControllerTest {
         String userId = "user123";
         String quizId = "quiz123";
 
-        User dummyUser = Mockito.mock(User.class);
-        Quiz dummyQuiz = Mockito.mock(Quiz.class);
-
         Date now = new Date();
-        LinkedQuiz linkedQuiz = new LinkedQuiz(dummyUser.getId(), dummyQuiz.getId(), now, "IN PROGRESS", 0, now, now);
+        LinkedQuiz linkedQuiz = new LinkedQuiz(userId, quizId, now, "IN PROGRESS", 0, now, now);
         linkedQuiz.setId("linkedQuiz123");
 
         when(userService.joinQuiz(userId, quizId)).thenReturn(linkedQuiz);
@@ -187,16 +182,10 @@ public class UserControllerTest {
         String quizId = "quizId123";
         String questionId = "question123";
 
-        LinkedQuiz dummyLinkedQuiz = Mockito.mock(LinkedQuiz.class);
-        Question dummyQuestion = Mockito.mock(Question.class);
-        when(dummyQuestion.getAnswers()).thenReturn(List.of("correctAnswer"));
-
         ResponseDto responseDto = new ResponseDto("correctAnswer");
 
-        boolean isCorrect = dummyQuestion.getAnswers().contains(responseDto.getResponse());
-
         Date now = new Date();
-        Response response = new Response(dummyLinkedQuiz.getId(), dummyQuestion.getId(), responseDto.getResponse(), isCorrect, now);
+        Response response = new Response(linkedQuizId, questionId, responseDto.getResponse(), true, now);
         response.setId("response123");
 
         when(userService.submitResponse(eq(quizId), eq(userId), eq(questionId), any(ResponseDto.class)))
@@ -205,7 +194,8 @@ public class UserControllerTest {
         String responseJson = objectMapper.writeValueAsString(responseDto);
 
         mockMvc.perform(post("/api/user/submit")
-                        .param("linkedQuizId", linkedQuizId)
+                        .param("quizId", quizId)
+                        .param("userId", userId)
                         .param("questionId", questionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(responseJson))
@@ -216,15 +206,15 @@ public class UserControllerTest {
     public void testCompleteQuiz_Success() throws Exception {
         String userId = "userId123";
         String quizId = "quizId123";
-        String linkedQuizId = "test-quiz-id";
         LinkedQuiz linkedQuiz = new LinkedQuiz(userId, quizId, new Date(), "IN PROGRESS", 0, new Date(), new Date());
         Quiz quiz = new Quiz(userId, "categoryId", "title", "description", false, false, new Date(), false);
         QuizSummaryDto summary = new QuizSummaryDto(linkedQuiz, quiz, "categoryName", 70, 2, 0, new ArrayList<>(), new ArrayList<>());
 
-        when(userService.completeQuiz(userId, quizId)).thenReturn(summary);
+        when(userService.completeQuiz(quizId, userId)).thenReturn(summary);
 
         mockMvc.perform(post("/api/user/complete")
-                        .param("linkedQuizId", linkedQuizId))
+                        .param("quizId", quizId)
+                        .param("userId", userId))
                 .andExpect(status().isOk());
     }
 

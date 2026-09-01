@@ -15,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 
 import java.util.Date;
 import java.util.Optional;
@@ -24,8 +23,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -62,12 +59,8 @@ public class UserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
-        LinkedRole linkedRole = new LinkedRole(userCaptor.getValue().getId(), roleRepository.findByName("USER").get().getId());
-        User savedUser = new User(linkedRole.getId(), userDto.getEmail(), userDto.getPassword(), new Date(), false);
-        linkedRole.setUserId(savedUser.getId());
-
         when(userRepository.save(any(User.class)))
-                .thenReturn(savedUser);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         User result = userService.register(userDto);
 
@@ -142,8 +135,7 @@ public class UserServiceTest {
         userService.register(userDto);
         verify(linkedRoleRepository).save(linkedRoleCaptor.capture());
 
-        assertThat(roleRepository.findById(linkedRoleCaptor.getValue().getRoleId()).get().getName())
-                .isEqualTo("USER");
+        assertThat(linkedRoleCaptor.getValue().getRoleId()).isEqualTo(role.getId());
     }
 
 
