@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 import java.util.Optional;
@@ -138,6 +139,30 @@ public class UserServiceTest {
         assertThat(linkedRoleCaptor.getValue().getRoleId()).isEqualTo(role.getId());
     }
 
+    @Test
+    void testLogin_Success() {
+        String hashed = new BCryptPasswordEncoder().encode("password");
+        User existingUser = new User(null, userDto.getEmail(), hashed, new Date(), false);
 
+        when(userRepository.findByEmail(userDto.getEmail()))
+                .thenReturn(Optional.of(existingUser));
+
+        User result = userService.login(new UserLoginDto(userDto.getEmail(), "password"));
+
+        assertThat(result).isEqualTo(existingUser);
+    }
+
+    @Test
+    void testLogin_WrongPassword_ShouldThrowException() {
+        String hashed = new BCryptPasswordEncoder().encode("password");
+        User existingUser = new User(null, userDto.getEmail(), hashed, new Date(), false);
+
+        when(userRepository.findByEmail(userDto.getEmail()))
+                .thenReturn(Optional.of(existingUser));
+
+        assertThatThrownBy(() -> userService.login(new UserLoginDto(userDto.getEmail(), "wrongpassword")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email/Password Incorrect.");
+    }
 
 }
