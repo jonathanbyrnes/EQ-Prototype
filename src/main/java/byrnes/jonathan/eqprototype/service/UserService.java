@@ -4,6 +4,7 @@ import byrnes.jonathan.eqprototype.dto.*;
 import byrnes.jonathan.eqprototype.model.*;
 import byrnes.jonathan.eqprototype.repository.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,6 +22,7 @@ public class UserService {
     private final QuestionRepository questionRepository;
     private final ResponseRepository responseRepository;
     private final CategoryRepository categoryRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository, LinkedRoleRepository linkedRoleRepository, PasswordResetTokenRepository passwordResetTokenRepository, QuizRepository quizRepository, LinkedQuizRepository linkedQuizRepository, QuestionRepository questionRepository, ResponseRepository responseRepository, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
@@ -47,7 +49,7 @@ public class UserService {
         User user = new User(
                 linkedRole.getId(),
                 userRegistrationDto.getEmail(),
-                userRegistrationDto.getPassword(),
+                this.passwordEncoder.encode(userRegistrationDto.getPassword()),
                 new Date(),
                 false);
 
@@ -59,11 +61,8 @@ public class UserService {
     public User login(UserLoginDto userLoginDto) {
         User user = getUserByEmail(userLoginDto.getEmail());
 
-        if (userLoginDto.getEmail().equals(user.getEmail())) {
-            if (userLoginDto.getPassword().equals(user.getPassword())) {
-                System.out.println("Successfully logged in User: " + user.getEmail());
-                return user;
-            }
+        if (this.passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword())) {
+            return user;
         }
         throw new IllegalArgumentException("Email/Password Incorrect.");
     }
@@ -75,7 +74,7 @@ public class UserService {
             user.setEmail(userUpdateDto.getEmail());
         }
         if (userUpdateDto.getPassword() != null && !userUpdateDto.getPassword().isBlank()) {
-            user.setPassword(userUpdateDto.getPassword());
+            user.setPassword(this.passwordEncoder.encode(userUpdateDto.getPassword()));
         }
 
         return this.userRepository.save(user);
@@ -103,7 +102,7 @@ public class UserService {
 
         User user = getUserById(passwordResetToken.getUserId());
 
-        user.setPassword(resetPasswordDto.getPassword());
+        user.setPassword(this.passwordEncoder.encode(resetPasswordDto.getPassword()));
         this.passwordResetTokenRepository.delete(passwordResetToken);
         return this.userRepository.save(user);
     }
